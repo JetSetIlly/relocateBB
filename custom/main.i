@@ -177,41 +177,20 @@ unsigned int get32bitdf(int offset)
 {
   return((fetcheraddr[(offset)+30]<<8)+fetcheraddr[(offset)+22]);
 }
-
-void shiftnumbers(int xreg)
+# 228 "main.c"
+char checkwrap(char a, char b)
 {
-  while (xreg!=maxsprites-1)
-  {
-    myGfxIndex[xreg]=myGfxIndex[xreg+1];
-    xreg++;
-  }
-
+  if (((a+b)&255)<b) return 0;
+  return a;
 }
-
-
-
-
-
-
 
 int checkswap(int a, int b)
 {
   signed int temp1;
   char s1,s2;
 
-
-  if ((RIOT[player1y+a]+RIOT[player1height+a]&255) < RIOT[player1height+a]) {
-   s1 = 0;
-  } else {
-   s1 = RIOT[player1y+a];
-  }
-
-
-  if ((RIOT[player1y+b]+RIOT[player1height+b]&255) < RIOT[player1height+b]) {
-   s2 = 0;
-  } else {
-   s2 = RIOT[player1y+b];
-  }
+  s1=checkwrap(RIOT[player1y+a],RIOT[player1height+a]);
+  s2=checkwrap(RIOT[player1y+b],RIOT[player1height+b]);
 
   temp1=s1-s2;
   if (temp1>0)
@@ -245,9 +224,8 @@ void copynybble(unsigned char num)
     unsigned char *source;
     destination=queue+(fetcheraddr[(1)+56]<<8)+fetcheraddr[(0)+56]+((temp5++)<<3);
     source=flashdata+(fetcheraddr[(1)+54]<<8)+fetcheraddr[(0)+54]+((num&0x0F)<<3);
-        for(i=0;i<8;i++)
-                destination[i] = source[7-i];
-
+    for(i=0;i<8;i++)
+      destination[i] = source[7-i];
 }
 
 void on_off_flip(unsigned int loc, unsigned int fnmask)
@@ -388,7 +366,13 @@ int main()
   {
     case OVERLAP:
       temp3--;
-      shiftnumbers(temp2);
+
+   temp4 = temp2;
+   while (temp4!=maxsprites-1)
+   {
+  myGfxIndex[temp4]=myGfxIndex[temp4+1];
+  temp4++;
+   }
       break;
     case NOOVERLAP:
       break;
@@ -483,12 +467,11 @@ int main()
     count++;
   }
   temp5=1;
-    copynybble(RIOT[score]);
-    copynybble(RIOT[score] >> 4);
-    copynybble(RIOT[score2]);
-    copynybble(RIOT[score2] >> 4);
-    copynybble(RIOT[score3]);
-    copynybble(RIOT[score3] >> 4);
+
+  for (i = score; i <= score3; i++) {
+    copynybble(RIOT[i]);
+    copynybble(RIOT[i] >> 4);
+  }
 
   return 0;
 }

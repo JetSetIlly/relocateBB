@@ -216,15 +216,14 @@ unsigned int get32bitdf(int offset)
   return((dfhigh(offset)<<8)+dflow(offset));
 }
 
-void shiftnumbers(int xreg)
-{
-  while (xreg!=maxsprites-1)
-  {
-    myGfxIndex[xreg]=myGfxIndex[xreg+1];
-    xreg++;
-  }
-  
-}
+/* void shiftnumbers(int xreg) */
+/* { */
+/*   while (xreg!=maxsprites-1) */
+/*   { */
+/*     myGfxIndex[xreg]=myGfxIndex[xreg+1]; */
+/*     xreg++; */
+/*   } */
+/* } */
 
 char checkwrap(char a, char b)
 {
@@ -272,9 +271,8 @@ void copynybble(unsigned char num)
     unsigned char *source;
     destination=queue+(scorepointer(1)<<8)+scorepointer(0)+((temp5++)<<3);
     source=flashdata+(scoregraphics(1)<<8)+scoregraphics(0)+((num&0x0F)<<3);
-        for(i=0;i<8;i++)
-                destination[i] = source[7-i];
-
+    for(i=0;i<8;i++)
+      destination[i] = source[7-i];
 }
 
 void on_off_flip(unsigned int loc, unsigned int fnmask)
@@ -415,7 +413,13 @@ int main()
   {
     case OVERLAP:
       temp3--;
-      shiftnumbers(temp2);
+      /* shiftnumbers(temp2); */
+	  temp4 = temp2;
+	  while (temp4!=maxsprites-1)
+	  {
+		myGfxIndex[temp4]=myGfxIndex[temp4+1];
+		temp4++;
+	  }
       break;
     case NOOVERLAP:
       break;
@@ -510,12 +514,11 @@ int main()
     count++;
   }
   temp5=1;
-    copynybble(RIOT[score]);//+i
-    copynybble(RIOT[score] >> 4);
-    copynybble(RIOT[score2]);
-    copynybble(RIOT[score2] >> 4);
-    copynybble(RIOT[score3]);
-    copynybble(RIOT[score3] >> 4);
+
+  for (i = score; i <= score3; i++) {
+    copynybble(RIOT[i]);
+    copynybble(RIOT[i] >> 4);
+  }
 
   return 0;
 }
