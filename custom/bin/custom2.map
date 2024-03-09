@@ -1,0 +1,202 @@
+Archive member included to satisfy reference by file (symbol)
+
+/home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+                              main.o (memmove)
+/home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+                              main.o (memcpy)
+
+Discarded input sections
+
+ .text          0x0000000000000000        0x0 custom.o
+ .data          0x0000000000000000        0x0 custom.o
+ .bss           0x0000000000000000        0x0 custom.o
+ .text          0x0000000000000000        0x0 main.o
+ .text          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+ .data          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+ .bss           0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+ .text          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .data          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .bss           0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+boot             0x0000000020000c00 0x0000000000000080 xr
+C_code           0x0000000020000c80 0x0000000000005400 xr
+ram              0x0000000010001c00 0x0000000000000200
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD custom.o
+LOAD main.o
+START GROUP
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v6-m/nofp/libgcc.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libc.a
+END GROUP
+                0x0000000010001fdc                _stack_end = 0x10001fdc
+
+.bootcode       0x0000000020000c00       0x50
+                0x0000000020000c00                _sboot = .
+ *(.boot)
+ .boot          0x0000000020000c00       0x50 custom.o
+                0x0000000020000c00                Custom
+                0x0000000020000c50                . = ALIGN (0x4)
+                0x0000000020000c50                _eboot = .
+
+.text           0x0000000020000c80      0x814
+                0x0000000020000c80                .stext = .
+                0x0000000020000c80                . = ALIGN (0x4)
+ *(.text)
+ *(.text.*)
+ .text.my_memcpy
+                0x0000000020000c80       0x28 main.o
+                0x0000000020000c80                my_memcpy
+ .text.my_memset
+                0x0000000020000ca8        0xe main.o
+                0x0000000020000ca8                my_memset
+ .text.reverse  0x0000000020000cb6       0x16 main.o
+                0x0000000020000cb6                reverse
+ .text.memscroll
+                0x0000000020000ccc       0x26 main.o
+                0x0000000020000ccc                memscroll
+ *fill*         0x0000000020000cf2        0x2 
+ .text.get32bitdff
+                0x0000000020000cf4       0x1c main.o
+                0x0000000020000cf4                get32bitdff
+ .text.get32bitdf
+                0x0000000020000d10       0x14 main.o
+                0x0000000020000d10                get32bitdf
+ .text.shiftnumbers
+                0x0000000020000d24       0x20 main.o
+                0x0000000020000d24                shiftnumbers
+ .text.checkswap
+                0x0000000020000d44       0x48 main.o
+                0x0000000020000d44                checkswap
+ .text.copynybble
+                0x0000000020000d8c       0x5c main.o
+                0x0000000020000d8c                copynybble
+ .text.on_off_flip
+                0x0000000020000de8       0x40 main.o
+                0x0000000020000de8                on_off_flip
+ .text.startup.main
+                0x0000000020000e28      0x4e8 main.o
+                0x0000000020000e28                main
+ .text.memmove  0x0000000020001310       0xb0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+                0x0000000020001310                memmove
+ .text.memcpy   0x00000000200013c0       0x90 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+                0x00000000200013c0                memcpy
+ *(.rodata)
+ .rodata        0x0000000020001450       0x20 main.o
+                0x0000000020001450                maskdata
+ *(.rodata*)
+ .rodata.str1.1
+                0x0000000020001470       0x21 main.o
+                0x0000000020001494                . = ALIGN (0x4)
+ *fill*         0x0000000020001491        0x3 
+                0x0000000020001494                _etext = .
+
+.glue_7         0x0000000020001494        0x0
+ .glue_7        0x0000000020001494        0x0 linker stubs
+
+.glue_7t        0x0000000020001494        0x0
+ .glue_7t       0x0000000020001494        0x0 linker stubs
+
+.vfp11_veneer   0x0000000020001494        0x0
+ .vfp11_veneer  0x0000000020001494        0x0 linker stubs
+
+.v4_bx          0x0000000020001494        0x0
+ .v4_bx         0x0000000020001494        0x0 linker stubs
+
+.iplt           0x0000000020001494        0x0
+ .iplt          0x0000000020001494        0x0 custom.o
+
+.rel.dyn        0x0000000020001494        0x0
+ .rel.iplt      0x0000000020001494        0x0 custom.o
+
+.data           0x0000000010001c00       0x30 load address 0x0000000020001494
+                0x0000000010001c00                . = ALIGN (0x4)
+                0x0000000010001c00                _sdata = .
+ *(.data)
+ .data          0x0000000010001c00       0x30 main.o
+                0x0000000010001c00                myGfxIndex
+                0x0000000010001c0c                RIOT
+                0x0000000010001c10                queue
+                0x0000000010001c14                flashdata
+                0x0000000010001c18                C_function
+                0x0000000010001c1c                fetcher_address_table
+                0x0000000010001c20                spritesort
+                0x0000000010001c2c                queue_int
+ *(.data.*)
+                0x0000000010001c30                . = ALIGN (0x4)
+                0x0000000010001c30                _edata = .
+
+.igot.plt       0x0000000010001c30        0x0 load address 0x00000000200014c4
+ .igot.plt      0x0000000010001c30        0x0 custom.o
+
+.bss            0x0000000010001c30       0x1c load address 0x00000000200014c4
+                0x0000000010001c30                . = ALIGN (0x4)
+                0x0000000010001c30                _sbss = .
+ *(.bss)
+ .bss           0x0000000010001c30       0x1c main.o
+                0x0000000010001c30                mask
+                0x0000000010001c34                fetcheraddr
+                0x0000000010001c38                maxsprites
+                0x0000000010001c3c                temp5
+                0x0000000010001c40                pfpixel
+                0x0000000010001c44                count
+                0x0000000010001c48                temp4
+ *(COMMON)
+                0x0000000010001c4c                . = ALIGN (0x4)
+                0x0000000010001c4c                _ebss = .
+                0x0000000010001c4c                end = .
+OUTPUT(bin/custom2.elf elf32-littlearm)
+LOAD linker stubs
+
+.ARM.attributes
+                0x0000000000000000       0x2d
+ .ARM.attributes
+                0x0000000000000000       0x1a custom.o
+ .ARM.attributes
+                0x000000000000001a       0x2b main.o
+ .ARM.attributes
+                0x0000000000000045       0x2c /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+ .ARM.attributes
+                0x0000000000000071       0x2c /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+
+.comment        0x0000000000000000       0x45
+ .comment       0x0000000000000000       0x45 main.o
+                                         0x46 (size before relaxing)
+
+.debug_info     0x0000000000000000      0xaeb
+ .debug_info    0x0000000000000000      0xaeb main.o
+
+.debug_abbrev   0x0000000000000000      0x260
+ .debug_abbrev  0x0000000000000000      0x260 main.o
+
+.debug_loclists
+                0x0000000000000000      0x362
+ .debug_loclists
+                0x0000000000000000      0x362 main.o
+
+.debug_aranges  0x0000000000000000       0x70
+ .debug_aranges
+                0x0000000000000000       0x70 main.o
+
+.debug_rnglists
+                0x0000000000000000       0x50
+ .debug_rnglists
+                0x0000000000000000       0x50 main.o
+
+.debug_line     0x0000000000000000      0x962
+ .debug_line    0x0000000000000000      0x962 main.o
+
+.debug_str      0x0000000000000000      0x663
+ .debug_str     0x0000000000000000      0x663 main.o
+                                        0x691 (size before relaxing)
+
+.debug_frame    0x0000000000000000      0x17c
+ .debug_frame   0x0000000000000000      0x11c main.o
+ .debug_frame   0x000000000000011c       0x30 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memmove.o)
+ .debug_frame   0x000000000000014c       0x30 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
