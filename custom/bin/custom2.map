@@ -159,32 +159,32 @@ LOAD linker stubs
  .comment       0x0000000000000000       0x45 main.o
                                          0x46 (size before relaxing)
 
-.debug_info     0x0000000000000000      0xb2a
- .debug_info    0x0000000000000000      0xb2a main.o
+.debug_info     0x0000000000000000      0x7e7
+ .debug_info    0x0000000000000000      0x7e7 main.o
 
-.debug_abbrev   0x0000000000000000      0x2d9
- .debug_abbrev  0x0000000000000000      0x2d9 main.o
+.debug_abbrev   0x0000000000000000      0x270
+ .debug_abbrev  0x0000000000000000      0x270 main.o
 
-.debug_loclists
-                0x0000000000000000      0x39e
- .debug_loclists
-                0x0000000000000000      0x39e main.o
+.debug_loc      0x0000000000000000      0x445
+ .debug_loc     0x0000000000000000      0x445 main.o
 
 .debug_aranges  0x0000000000000000       0x70
  .debug_aranges
                 0x0000000000000000       0x70 main.o
 
-.debug_rnglists
-                0x0000000000000000       0x50
- .debug_rnglists
-                0x0000000000000000       0x50 main.o
+.debug_ranges   0x0000000000000000       0x60
+ .debug_ranges  0x0000000000000000       0x60 main.o
 
-.debug_line     0x0000000000000000      0x9b5
- .debug_line    0x0000000000000000      0x9b5 main.o
+.debug_macinfo  0x0000000000000000     0x30d4
+ .debug_macinfo
+                0x0000000000000000     0x30d4 main.o
 
-.debug_str      0x0000000000000000      0x649
- .debug_str     0x0000000000000000      0x649 main.o
-                                        0x66f (size before relaxing)
+.debug_line     0x0000000000000000      0x96e
+ .debug_line    0x0000000000000000      0x96e main.o
+
+.debug_str      0x0000000000000000      0x652
+ .debug_str     0x0000000000000000      0x652 main.o
+                                        0x671 (size before relaxing)
 
 .debug_frame    0x0000000000000000      0x144
  .debug_frame   0x0000000000000000      0x114 main.o

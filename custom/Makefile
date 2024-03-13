@@ -20,7 +20,8 @@ OBJDUMP=$(TOOLCHAIN)-objdump
 OPTIMIZATION = -Oz 
 CFLAGS = -march=armv6-m -mthumb
 #CFLAGS = -mcpu=arm7tdmi -march=armv4t -mthumb
-CFLAGS += -Wall -ffunction-sections -save-temps -g -Wa,-a,-ad,-alhms=$(<:%.c=$(BIN)/%.lst) # -mlong-calls -save-temps 
+CFLAGS += -Wall -ffunction-sections -save-temps -Wa,-a,-ad,-alhms=$(<:%.c=$(BIN)/%.lst) # -mlong-calls -save-temps 
+CFLAGS += -g3 -gdwarf-4 -gstrict-dwarf
 
 CFLAGS += $(OPTIMIZATION) $(INCLUDES)
 
