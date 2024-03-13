@@ -11,8 +11,31 @@ import (
 	"strings"
 )
 
-//go:embed "custom/bin/custom2.bin"
-var custom2 []byte
+//go:embed "ace/bin/driver.ace"
+var newDriver []byte
+
+//go:embed "custom/bin/custom.bin"
+var newCustom []byte
+
+// original custom code block is assumed to have these exact properties.
+// detection of other block properties (for custom or recompiled kernels will be
+// added in the future)
+const (
+	customOrigin = 0x0c00
+	customMemtop = 0x1494
+	customLength = customMemtop - customOrigin
+	customMD5    = "6314863c98ea59ffb99442ef80e19008"
+)
+
+func init() {
+	if len(newDriver) != 0x0c00 {
+		panic("ACE header is incorrect length. Must be exactly 3k")
+	}
+
+	if len(newCustom) > customLength {
+		panic(fmt.Sprintf("replacement custom program cannot be larger than %dbytes", customLength))
+	}
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -20,6 +43,7 @@ func main() {
 		return
 	}
 
+	// process all files listed on the command line
 	for _, fn := range os.Args[1:] {
 		err := process(fn)
 		if err != nil {
@@ -29,23 +53,18 @@ func main() {
 }
 
 func process(fn string) error {
-	b, err := os.ReadFile(fn)
+	original, err := os.ReadFile(fn)
 	if err != nil {
 		return err
 	}
 
 	// check for DPC+ file
-	if bytes.Count(b, []byte("DPC+")) < 2 || len(b) != 32768 {
+	if bytes.Count(original, []byte("DPC+")) < 2 || len(original) != 32768 {
 		return fmt.Errorf("%s is not a DPC+ file", fn)
 	}
 
-	// original custom code is assumed to have these exact properties
-	const (
-		customOrigin = 0x0c00
-		customMemtop = 0x1494
-		customMD5    = "6314863c98ea59ffb99442ef80e19008"
-	)
-	custom := b[customOrigin:customMemtop]
+	// slice off custom code
+	custom := original[customOrigin:customMemtop]
 
 	// check that the custom section is expected
 	if fmt.Sprintf("%x", md5.Sum(custom)) != customMD5 {
@@ -53,24 +72,29 @@ func process(fn string) error {
 	}
 
 	// there may be a difference in the size of the custom sections
-	sizeDiff := len(custom2) - len(custom)
+	sizeDiff := len(custom) - len(newCustom)
+	if sizeDiff < 0 {
+		// this error shouldn't ever trigger because
+		return fmt.Errorf("replacement custom code is too large")
+	}
 
-	// build new output data, taking size difference into account. if the
-	// replacement code is smaller than the original then there will be trailing
-	// bytes from the original code
+	// build new output data, taking size difference into account by adding
+	// empty bytes of length sizeDiff
 	//
 	// if it is larger then the data following the custom code will be
-	// overwritten in the batari basic DPC+ kernel, this is font data for the
+	// overwritten. in the batari basic DPC+ kernel this is font data for the
 	// scoreline. the ROM should still work but the scoreline, if it is used by
 	// the game, will be corrupted
-	o := b[:customOrigin]
-	o = append(o, custom2...)
-	o = append(o, b[customMemtop+sizeDiff:]...)
+	o := newDriver[:customOrigin]
+	o = append(o, newCustom...)
+	o = append(o, make([]byte, sizeDiff)...)
+	o = append(o, original[customMemtop:]...)
 
-	// new filename based on input filename
+	// new filename is created from the original filename. taking the
+	// opportunity to tidy up the name
 	sfn, _, _ := strings.Cut(fn, filepath.Ext(fn))
 	sfn = strings.Replace(sfn, ".bas", "", 1)
-	sfn = fmt.Sprintf("%s_plusrom%s", sfn, filepath.Ext(fn))
+	sfn = fmt.Sprintf("%s.ace", sfn)
 
 	// write new file
 	err = os.WriteFile(sfn, o, 0644)
@@ -78,6 +102,7 @@ func process(fn string) error {
 		return err
 	}
 
+	// log success
 	log.Printf("%s converted to %s\n", fn, sfn)
 
 	return nil

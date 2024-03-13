@@ -39,7 +39,7 @@ default: custom2
 
 ############################# HARMONY CUSTOM C ##############################
 
-CUSTOMNAME = custom2
+CUSTOMNAME = custom
 CUSTOMELF = $(BIN)/$(CUSTOMNAME).elf
 CUSTOMBIN = $(BIN)/$(CUSTOMNAME).bin
 CUSTOMMAP = $(BIN)/$(CUSTOMNAME).map

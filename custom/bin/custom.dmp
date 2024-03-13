@@ -1,5 +1,5 @@
 
-bin/custom2.elf:     file format elf32-littlearm
+bin/custom.elf:     file format elf32-littlearm
 
 
 Disassembly of section .bootcode:
