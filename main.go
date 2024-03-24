@@ -74,7 +74,8 @@ func process(fn string) error {
 	// there may be a difference in the size of the custom sections
 	sizeDiff := len(custom) - len(newCustom)
 	if sizeDiff < 0 {
-		// this error shouldn't ever trigger because
+		// this error shouldn't ever trigger because we've already chedk the
+		// size in the init() function
 		return fmt.Errorf("replacement custom code is too large")
 	}
 
