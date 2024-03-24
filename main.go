@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	_ "embed"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -37,22 +38,89 @@ func init() {
 	}
 }
 
+var programName string
+
 func main() {
+	log.SetFlags(0)
+
+	programName = filepath.Base(os.Args[0])
+	args := os.Args[1:]
+
 	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <bB ROMS>\n", filepath.Base(os.Args[0]))
+		fmt.Printf("usage: %s <bB ROMS>\n", programName)
 		return
 	}
 
+	flgs := flag.NewFlagSet(programName, flag.ExitOnError)
+
+	var check bool
+	flgs.BoolVar(&check, "check", false, "checks for valid PlusROM DPC+ and outputs section hashes")
+
+	err := flgs.Parse(args)
+	if err != nil {
+		log.Print(err)
+	}
+	args = flgs.Args()
+
+	var process func(string) error
+	if check {
+		process = doCheck
+	} else {
+		process = doRelocate
+	}
+
 	// process all files listed on the command line
-	for _, fn := range os.Args[1:] {
-		err := process(fn)
+	for i, fn := range args {
+		if check {
+			err = doCheck(fn)
+		} else {
+			err = process(fn)
+		}
+
 		if err != nil {
 			log.Print(err)
+		}
+
+		if check && i < len(args)-1 {
+			fmt.Println("")
 		}
 	}
 }
 
-func process(fn string) error {
+func doCheck(fn string) error {
+	original, err := os.ReadFile(fn)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(filepath.Base(fn))
+
+	// check for PlusROM DPC+ file
+	if bytes.Count(original, []byte("DPCp")) < 2 || len(original) != 32768 {
+		return fmt.Errorf("not a PlusROM DPC+ file")
+	}
+
+	// slice off custom code
+	driver := original[:customOrigin]
+	driverMD5 := md5.Sum(driver)
+	fmt.Printf("Driver: %x\n", driverMD5)
+
+	if driverMD5 != md5.Sum(newDriver) {
+		fmt.Printf("not added by this version of %s\n", programName)
+	} else {
+		custom := original[customOrigin : customOrigin+len(newCustom)]
+		customMD5 := md5.Sum(custom)
+		fmt.Printf("Custom: %x\n", customMD5)
+
+		if customMD5 != md5.Sum(newCustom) {
+			fmt.Printf("not added by this version of %s\n", programName)
+		}
+	}
+
+	return nil
+}
+
+func doRelocate(fn string) error {
 	original, err := os.ReadFile(fn)
 	if err != nil {
 		return err
