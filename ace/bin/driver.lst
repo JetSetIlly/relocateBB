@@ -18,34 +18,41 @@
      17  0008
      18  0008
      19  0008				   ACE-Driver
-     20  0008							; driver name should be a string 16 chars wide exactly
-     21  0008							;		  "		   "
-     22  0008		       44 50 43 70*	      dc.b	"DPCpPLUSCARTGAME"
-     23  0018
-     24  0018				   ACE-Driver-Version
-     25  0018		       00		      .byte.b	$00
-     26  0019		       00		      .byte.b	$00
-     27  001a		       00		      .byte.b	$00
-     28  001b		       00		      .byte.b	$00
-     29  001c
-     30  001c				   ACE-RomSize
-     31  001c		       00 80 00 00	      .long.l	$8000
-     32  0020
-     33  0020				   ACE-RomChecksum
-     34  0020		       00		      .byte.b	$00
-     35  0021		       00		      .byte.b	$00
-     36  0022		       00		      .byte.b	$00
-     37  0023		       00		      .byte.b	$00
-     38  0024
-     39  0024				   ACE_Offset
-     40  0024		       31 00 00 00	      .long.l	ARMCODE + $00000001	; + $08020200
-     41  0028		       44 50 43 70*	      dc.b	"DPCpUF0"
-     42  002f
-     43  0030		       00		      align	16
-     44  0030				   ARMCODE
-     45  0030					      incbin	"driver.bin"
-     46  08fc
-     47  0bff					      org	$0bff
-     48  0bff		       ff		      .byte.b	$ff
-     49  0c00
-     50  0c00					      END
+     20  0008							; driver name should always begin with the string "DPCp " (including the space)
+     21  0008							;
+     22  0008							; it should also include a version string of the form "vX.Y" where X and Y are
+     23  0008							; integers
+     24  0008							;
+     25  0008							; nothing else should be included in the driver name apart from whitespace
+     26  0008							;
+     27  0008							; finally, the driver name should be exactly string 16 chars wide exactly
+     28  0008							;		  "		   "
+     29  0008		       44 50 43 70*	      dc.b	"DPCp v1.0	  "
+     30  0018
+     31  0018				   ACE-Driver-Version
+     32  0018		       00		      .byte.b	$00
+     33  0019		       00		      .byte.b	$00
+     34  001a		       00		      .byte.b	$00
+     35  001b		       00		      .byte.b	$00
+     36  001c
+     37  001c				   ACE-RomSize
+     38  001c		       00 80 00 00	      .long.l	$8000
+     39  0020
+     40  0020				   ACE-RomChecksum
+     41  0020		       00		      .byte.b	$00
+     42  0021		       00		      .byte.b	$00
+     43  0022		       00		      .byte.b	$00
+     44  0023		       00		      .byte.b	$00
+     45  0024
+     46  0024				   ACE_Offset
+     47  0024		       31 00 00 00	      .long.l	ARMCODE + $00000001	; + $08020200
+     48  0028		       44 50 43 70*	      dc.b	"DPCpUF0"
+     49  002f
+     50  0030		       00		      align	16
+     51  0030				   ARMCODE
+     52  0030					      incbin	"driver.bin"
+     53  08fc
+     54  0bff					      org	$0bff
+     55  0bff		       ff		      .byte.b	$ff
+     56  0c00
+     57  0c00					      END

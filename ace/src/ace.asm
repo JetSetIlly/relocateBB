@@ -17,9 +17,16 @@ ACE-UF00:
 
 
 ACE-Driver:	
-; driver name should be a string 16 chars wide exactly
+; driver name should always begin with the string "DPCp " (including the space)
+;
+; it should also include a version string of the form "vX.Y" where X and Y are
+; integers
+;
+; nothing else should be included in the driver name apart from whitespace
+;
+; finally, the driver name should be exactly string 16 chars wide exactly 
 ;                "                "
-			dc.b "DPCpPLUSCARTGAME"
+			dc.b "DPCp v1.0       "
 
 ACE-Driver-Version:	
 			.byte $00
