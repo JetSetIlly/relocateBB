@@ -1,4 +1,4 @@
-bin/driver.o: src/driver.c \
+bin/driver.o: src/driver.c src/cartridge_io.h \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/flash.h \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/stm32f4xx_hal_conf.h \
@@ -32,6 +32,7 @@ bin/driver.o: src/driver.c \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/global.h \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/cartridge_firmware.h \
  United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/cartridge_io.h
+src/cartridge_io.h:
 United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/flash.h:
 United-Carts-of-Atari/source/STM32firmware/PlusCart/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 United-Carts-of-Atari/source/STM32firmware/PlusCart/Inc/stm32f4xx_hal_conf.h:

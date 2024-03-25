@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "cartridge_io.h"
 #include "flash.h"
 #include "cartridge_firmware.h"
 

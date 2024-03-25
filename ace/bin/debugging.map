@@ -120,12 +120,12 @@ LOAD linker stubs
 .debug_ranges   0x0000000000000000       0x40
  .debug_ranges  0x0000000000000000       0x40 bin/driver.o
 
-.debug_macinfo  0x0000000000000000    0xd4f4a
+.debug_macinfo  0x0000000000000000    0xd4f4e
  .debug_macinfo
-                0x0000000000000000    0xd4f4a bin/driver.o
+                0x0000000000000000    0xd4f4e bin/driver.o
 
-.debug_line     0x0000000000000000     0x13a2
- .debug_line    0x0000000000000000     0x13a2 bin/driver.o
+.debug_line     0x0000000000000000     0x13b4
+ .debug_line    0x0000000000000000     0x13b4 bin/driver.o
 
 .debug_str      0x0000000000000000      0x9e8
  .debug_str     0x0000000000000000      0x9e8 bin/driver.o
