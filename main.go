@@ -60,7 +60,9 @@ func main() {
 	flgs := flag.NewFlagSet(programName, flag.ExitOnError)
 
 	var check bool
+	var ace bool
 	flgs.BoolVar(&check, "check", false, "checks for valid PlusROM DPC+ and displays version information")
+	flgs.BoolVar(&ace, "ace", true, "add ACE header to converted binary")
 
 	err := flgs.Parse(args)
 	if err != nil {
@@ -68,19 +70,12 @@ func main() {
 	}
 	args = flgs.Args()
 
-	var process func(string) error
-	if check {
-		process = doCheck
-	} else {
-		process = doRelocate
-	}
-
 	// process all files listed on the command line
 	for i, fn := range args {
 		if check {
 			err = doCheck(fn)
 		} else {
-			err = process(fn)
+			err = doRelocate(fn, ace)
 		}
 
 		if err != nil {
@@ -137,7 +132,7 @@ func doCheck(fn string) error {
 	return nil
 }
 
-func doRelocate(fn string) error {
+func doRelocate(fn string, ace bool) error {
 	original, err := os.ReadFile(fn)
 	if err != nil {
 		return err
@@ -171,16 +166,28 @@ func doRelocate(fn string) error {
 	// overwritten. in the batari basic DPC+ kernel this is font data for the
 	// scoreline. the ROM should still work but the scoreline, if it is used by
 	// the game, will be corrupted
-	o := newDriver[:customOrigin]
-	o = append(o, newCustom...)
-	o = append(o, make([]byte, sizeDiff)...)
-	o = append(o, original[customMemtop:]...)
+	var o []byte
+	if ace {
+		o = newDriver[:customOrigin]
+		o = append(o, newCustom...)
+		o = append(o, make([]byte, sizeDiff)...)
+		o = append(o, original[customMemtop:]...)
+	} else {
+		o = original[:customOrigin]
+		o = append(o, newCustom...)
+		o = append(o, make([]byte, sizeDiff)...)
+		o = append(o, original[customMemtop:]...)
+	}
 
 	// new filename is created from the original filename. taking the
 	// opportunity to tidy up the name
 	sfn, _, _ := strings.Cut(fn, filepath.Ext(fn))
 	sfn = strings.Replace(sfn, ".bas", "", 1)
-	sfn = fmt.Sprintf("%s.ace", sfn)
+	if ace {
+		sfn = fmt.Sprintf("%s.ace", sfn)
+	} else {
+		sfn = fmt.Sprintf("%s_plusrom.bin", sfn)
+	}
 
 	// write new file
 	err = os.WriteFile(sfn, o, 0644)
