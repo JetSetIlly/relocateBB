@@ -3,13 +3,13 @@
 RelocateBB is a tool to be used with [Batari Basic](https://github.com/batari-Basic/batari-Basic) ROM files. It allows games that use the DPC+ kernel to be run on the PlusCart or the UnoCart. It will do nothing for bB games that that don't use the DPC+ kernel - those games will already run on the PlusCart and UnoCart.
 
 
-### compiling the ACE driver
+### Compiling the ACE driver
 
 The ACE driver is built with the GNU Arm Embedded Toolchain version of GCC. Full version banner of the compiler below.
 
 ```
-arm-none-eabi-gcc (GNU Arm Embedded Toolchain 10.3-2021.10) 10.3.1 20210824 (release)
-Copyright (C) 2020 Free Software Foundation, Inc.
+arm-none-eabi-gcc (Arm GNU Toolchain 12.2.Rel1 (Build arm-12.24)) 12.2.1 20221205
+Copyright (C) 2022 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
@@ -38,3 +38,7 @@ ACE-Driver:
 			dc.b "DPCp v1.0       "
 ```
 
+### Compiling the bB Custom Code
+
+The bB custom code is also built with the GNU Arm Embedded Toolchain version of GCC. Use the `make` command
+to build.

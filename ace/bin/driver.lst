@@ -51,8 +51,8 @@
      50  0030		       00		      align	16
      51  0030				   ARMCODE
      52  0030					      incbin	"driver.bin"
-     53  08fc
+     53  08f0
      54  0bff					      org	$0bff
-     55  0bff		       ff		      .byte.b	$ff
+     55  0bff		       00		      .byte.b	$00
      56  0c00
      57  0c00					      END

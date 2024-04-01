@@ -52,7 +52,7 @@ ARMCODE
 	incbin "driver.bin"
 
 	org $0bff 
-			.byte $ff
+			.byte $00
 
 		END
 

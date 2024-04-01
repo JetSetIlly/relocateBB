@@ -1,25 +1,25 @@
 Archive member included to satisfy reference by file (symbol)
 
-/home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+/home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
                               bin/driver.o (memcpy)
-/home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+/home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
                               bin/driver.o (memset)
 
 Discarded input sections
 
- .debug_info    0x0000000000000000      0xa9e bin/driver.o
- .debug_abbrev  0x0000000000000000      0x228 bin/driver.o
- .debug_loc     0x0000000000000000     0x101c bin/driver.o
+ .debug_info    0x0000000000000000      0xaf3 bin/driver.o
+ .debug_abbrev  0x0000000000000000      0x252 bin/driver.o
+ .debug_loc     0x0000000000000000      0xeb2 bin/driver.o
  .debug_aranges
                 0x0000000000000000       0x20 bin/driver.o
  .debug_ranges  0x0000000000000000       0x40 bin/driver.o
  .debug_macinfo
-                0x0000000000000000    0xd4f4e bin/driver.o
- .debug_line    0x0000000000000000     0x13b4 bin/driver.o
- .debug_str     0x0000000000000000      0xa4d bin/driver.o
+                0x0000000000000000    0xd5417 bin/driver.o
+ .debug_line    0x0000000000000000     0x13d0 bin/driver.o
+ .debug_str     0x0000000000000000      0xa58 bin/driver.o
  .debug_frame   0x0000000000000000       0x40 bin/driver.o
- .debug_frame   0x0000000000000000       0x28 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
- .debug_frame   0x0000000000000000       0x20 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+ .debug_frame   0x0000000000000000       0x28 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+ .debug_frame   0x0000000000000000       0x20 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
 
 Memory Configuration
 
@@ -28,107 +28,107 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
 LOAD bin/driver.o
 START GROUP
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/libgcc.a
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/libgcc.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
 END GROUP
 START GROUP
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard/libgcc.a
-LOAD /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/libgcc.a
+LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a
 END GROUP
 
 .text.emulate_ACEROM_cartridge
-                0x0000000008021200      0x888
+                0x0000000008021200      0x87c
  *(.text.emulate_ACEROM_cartridge*)
  .text.emulate_ACEROM_cartridge
-                0x0000000008021200      0x888 bin/driver.o
+                0x0000000008021200      0x87c bin/driver.o
                 0x0000000008021200                emulate_ACEROM_cartridge
 OUTPUT(bin/driver.elf elf32-littlearm)
 LOAD linker stubs
 
-.glue_7         0x0000000008021a88        0x0
- .glue_7        0x0000000008021a88        0x0 linker stubs
+.glue_7         0x0000000008021a7c        0x0
+ .glue_7        0x0000000008021a7c        0x0 linker stubs
 
-.glue_7t        0x0000000008021a88        0x0
- .glue_7t       0x0000000008021a88        0x0 linker stubs
+.glue_7t        0x0000000008021a7c        0x0
+ .glue_7t       0x0000000008021a7c        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008021a88        0x0
- .vfp11_veneer  0x0000000008021a88        0x0 linker stubs
+.vfp11_veneer   0x0000000008021a7c        0x0
+ .vfp11_veneer  0x0000000008021a7c        0x0 linker stubs
 
-.v4_bx          0x0000000008021a88        0x0
- .v4_bx         0x0000000008021a88        0x0 linker stubs
+.v4_bx          0x0000000008021a7c        0x0
+ .v4_bx         0x0000000008021a7c        0x0 linker stubs
 
-.text           0x0000000008021a88        0x0
- .text          0x0000000008021a88        0x0 bin/driver.o
- .text          0x0000000008021a88        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
- .text          0x0000000008021a88        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+.text           0x0000000008021a7c        0x0
+ .text          0x0000000008021a7c        0x0 bin/driver.o
+ .text          0x0000000008021a7c        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+ .text          0x0000000008021a7c        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
 
-.iplt           0x0000000008021a88        0x0
- .iplt          0x0000000008021a88        0x0 bin/driver.o
+.iplt           0x0000000008021a7c        0x0
+ .iplt          0x0000000008021a7c        0x0 bin/driver.o
 
-.text.memcpy    0x0000000008021a88       0x1c
- .text.memcpy   0x0000000008021a88       0x1c /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
-                0x0000000008021a88                memcpy
+.text.memcpy    0x0000000008021a7c       0x1c
+ .text.memcpy   0x0000000008021a7c       0x1c /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+                0x0000000008021a7c                memcpy
 
-.text.memset    0x0000000008021aa4       0x10
- .text.memset   0x0000000008021aa4       0x10 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
-                0x0000000008021aa4                memset
-
-.rodata         0x0000000008021ab4        0x8
- .rodata        0x0000000008021ab4        0x8 bin/driver.o
-
-.rodata.ADDR_IDR
-                0x0000000008021abc        0x4
- .rodata.ADDR_IDR
-                0x0000000008021abc        0x4 bin/driver.o
-                0x0000000008021abc                ADDR_IDR
-
-.rodata.DATA_IDR
-                0x0000000008021ac0        0x4
- .rodata.DATA_IDR
-                0x0000000008021ac0        0x4 bin/driver.o
-                0x0000000008021ac0                DATA_IDR
+.text.memset    0x0000000008021a98       0x10
+ .text.memset   0x0000000008021a98       0x10 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
+                0x0000000008021a98                memset
 
 .rodata.DATA_MODER
-                0x0000000008021ac4        0x4
+                0x0000000008021aa8        0x4
  .rodata.DATA_MODER
-                0x0000000008021ac4        0x4 bin/driver.o
-                0x0000000008021ac4                DATA_MODER
+                0x0000000008021aa8        0x4 bin/driver.o
+                0x0000000008021aa8                DATA_MODER
 
 .rodata.DATA_ODR
-                0x0000000008021ac8        0x4
+                0x0000000008021aac        0x4
  .rodata.DATA_ODR
-                0x0000000008021ac8        0x4 bin/driver.o
-                0x0000000008021ac8                DATA_ODR
+                0x0000000008021aac        0x4 bin/driver.o
+                0x0000000008021aac                DATA_ODR
 
-.rel.dyn        0x0000000008021acc        0x0
- .rel.iplt      0x0000000008021acc        0x0 bin/driver.o
+.rodata.DATA_IDR
+                0x0000000008021ab0        0x4
+ .rodata.DATA_IDR
+                0x0000000008021ab0        0x4 bin/driver.o
+                0x0000000008021ab0                DATA_IDR
 
-.data           0x0000000008021acc        0x0
- .data          0x0000000008021acc        0x0 bin/driver.o
- .data          0x0000000008021acc        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
- .data          0x0000000008021acc        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+.rodata.ADDR_IDR
+                0x0000000008021ab4        0x4
+ .rodata.ADDR_IDR
+                0x0000000008021ab4        0x4 bin/driver.o
+                0x0000000008021ab4                ADDR_IDR
 
-.igot.plt       0x0000000008021acc        0x0
- .igot.plt      0x0000000008021acc        0x0 bin/driver.o
+.rodata         0x0000000008021ab8        0x8
+ .rodata        0x0000000008021ab8        0x8 bin/driver.o
 
-.bss            0x0000000008021acc        0x0
- .bss           0x0000000008021acc        0x0 bin/driver.o
- .bss           0x0000000008021acc        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
- .bss           0x0000000008021acc        0x0 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+.rel.dyn        0x0000000008021ac0        0x0
+ .rel.iplt      0x0000000008021ac0        0x0 bin/driver.o
 
-.comment        0x0000000000000000       0x49
- .comment       0x0000000000000000       0x49 bin/driver.o
-                                         0x4a (size before relaxing)
+.data           0x0000000008021ac0        0x0
+ .data          0x0000000008021ac0        0x0 bin/driver.o
+ .data          0x0000000008021ac0        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+ .data          0x0000000008021ac0        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
+
+.igot.plt       0x0000000008021ac0        0x0
+ .igot.plt      0x0000000008021ac0        0x0 bin/driver.o
+
+.bss            0x0000000008021ac0        0x0
+ .bss           0x0000000008021ac0        0x0 bin/driver.o
+ .bss           0x0000000008021ac0        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+ .bss           0x0000000008021ac0        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
+
+.comment        0x0000000000000000       0x45
+ .comment       0x0000000000000000       0x45 bin/driver.o
+                                         0x46 (size before relaxing)
 
 .ARM.attributes
                 0x0000000000000000       0x34
  .ARM.attributes
                 0x0000000000000000       0x34 bin/driver.o
  .ARM.attributes
-                0x0000000000000034       0x34 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memcpy-stub.o)
+                0x0000000000000034       0x34 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
  .ARM.attributes
-                0x0000000000000068       0x34 /home/steve/gcc-arm-none-eabi-10.3-2021.10/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(lib_a-memset.o)
+                0x0000000000000068       0x34 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
