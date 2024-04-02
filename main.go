@@ -169,13 +169,45 @@ func doRelocate(fn string, ace bool) error {
 	// scoreline. the ROM should still work but the scoreline, if it is used by
 	// the game, will be corrupted
 	var o []byte
+
 	if ace {
+		// replace Harmony DPC+ driver with ACE DPC+ driver
 		o = newDriver[:customOrigin]
+
+		// add new custom section and use remainder of original file untouched
 		o = append(o, newCustom...)
 		o = append(o, make([]byte, sizeDiff)...)
 		o = append(o, original[customMemtop:]...)
 	} else {
-		o = original[:customOrigin]
+		// when the ace flag is false we don't replace the Harmony DPC+ driver
+		// with the ACE driver. instead we replace it with zero bytes and two
+		// "DPCp" strings to aid with fingerprinting. we place the "DPCp"
+		// strings at the same offsets as the "DPC+" strings in the original file
+
+		// split original into three parts using "DPC+" as the split point
+		splt := bytes.SplitN(original, []byte("DPC+"), 3)
+
+		// we've already checked that there are at least two instances of the
+		// "DPC+" string but we check again to make sure
+		if len(splt) < 3 {
+			return fmt.Errorf("%s is not a DPC+ file", fn)
+		}
+
+		// instead of appending the newDriver array we add a mostly empty driver
+		// section with the "DPCp" string inserting at the same points the
+		// "DPC+" string appeared in the original file
+		o = append(o, make([]byte, len(splt[0]))...)
+		o = append(o, []byte("DPCp")...)
+		o = append(o, make([]byte, len(splt[1]))...)
+		o = append(o, []byte("DPCp")...)
+		o = append(o, make([]byte, customOrigin-len(o))...)
+
+		// check we've assembled the driver section correctly
+		if len(o) != customOrigin {
+			return fmt.Errorf("%s error constructing file: driver section is incorrect length", fn)
+		}
+
+		// add new custom section and use remainder of original file untouched
 		o = append(o, newCustom...)
 		o = append(o, make([]byte, sizeDiff)...)
 		o = append(o, original[customMemtop:]...)
