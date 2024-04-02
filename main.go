@@ -99,27 +99,37 @@ func doCheck(fn string) error {
 	// display simplified file name
 	fmt.Println(filepath.Base(fn))
 
-	// check for PlusROM DPC+ file
-	if bytes.Count(original, []byte("DPCp")) < 3 || len(original) != 32768 {
+	// length check
+	if len(original) != 32768 {
 		return fmt.Errorf("not a PlusROM DPC+ file")
 	}
 
-	// information about the ACE driver first
-	driver := original[:customOrigin]
-	driverMD5 := md5.Sum(driver)
-	fmt.Printf("driver md5: %x\n", driverMD5)
-
-	version, err := driverVersion(driver)
-	if err != nil {
-		// any driver version error causes the checking of this ROM to end
-		return err
+	// check for DPCp in the first customOrigin bytes
+	dpcpCount := bytes.Count(original[:customOrigin], []byte("DPCp"))
+	if dpcpCount < 2 {
+		return fmt.Errorf("not a PlusROM DPC+ file")
 	}
-	fmt.Printf("driver version: %s\n", version)
 
-	if driverMD5 != md5.Sum(newDriver) {
-		// if the driver is not recognised we don't want to continue with
-		// the information about the custom code
-		return fmt.Errorf("not added by this version of %s\n", programName)
+	// information about the ACE driver
+	if dpcpCount >= 3 && bytes.Compare(original[:3], []byte("ACE")) == 0 {
+		driver := original[:customOrigin]
+		driverMD5 := md5.Sum(driver)
+		fmt.Printf("driver md5: %x\n", driverMD5)
+
+		version, err := driverVersion(driver)
+		if err != nil {
+			// any driver version error causes the checking of this ROM to end
+			return err
+		}
+		fmt.Printf("driver version: %s\n", version)
+
+		if driverMD5 != md5.Sum(newDriver) {
+			// if the driver is not recognised we don't want to continue with
+			// the information about the custom code
+			return fmt.Errorf("not added by this version of %s\n", programName)
+		}
+	} else {
+		fmt.Println("driverless PlusROM DPC+ file")
 	}
 
 	// information about the BB custom section
