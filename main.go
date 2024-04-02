@@ -44,31 +44,33 @@ func init() {
 	}
 }
 
-var programName string
+const programName = "relocateBB"
 
 func main() {
+	// remove timestamp from log messages
 	log.SetFlags(0)
 
-	programName = filepath.Base(os.Args[0])
-	args := os.Args[1:]
-
-	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <bB ROMS>\n", programName)
-		return
-	}
-
+	// command line arguments
 	flgs := flag.NewFlagSet(programName, flag.ExitOnError)
+	flgs.Usage = func() {
+		fmt.Printf("Usage: %s (options) [list of rom files]\n", filepath.Base(os.Args[0]))
+		flgs.PrintDefaults()
+	}
 
 	var check bool
 	var ace bool
 	flgs.BoolVar(&check, "check", false, "checks for valid PlusROM DPC+ and displays version information")
 	flgs.BoolVar(&ace, "ace", true, "add ACE header to converted binary")
 
-	err := flgs.Parse(args)
+	err := flgs.Parse(os.Args[1:])
 	if err != nil {
 		log.Print(err)
 	}
-	args = flgs.Args()
+	args := flgs.Args()
+	if len(args) == 0 {
+		log.Print("invalid arguments (use --help for usage)")
+		return
+	}
 
 	// process all files listed on the command line
 	for i, fn := range args {
