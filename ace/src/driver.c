@@ -9,57 +9,56 @@
 #include "flash.h"
 #include "cartridge_firmware.h"
 
+/* 
+  PlusCart/Unocart Unified ACE Driver for DPC+
+  v1.02 2024-03-21 
+  
+  This source is compiled and included in bB games compiled for PlusCart/Unocart.
+  Based off cartridge_emulation_dpcp.c Created on: 07.07.2020 Author: stubig, adaption to ACE by Marco Johannes and JetSetIlly
+    
+*/
 
 int emulate_ACEROM_cartridge()
 {
 	// Setup the function pointers out of memory
-	uint32_t* buffer32 = (uint32_t*)0x20000000;
+	uint32_t* buffer32 = (uint32_t*)0x20000000; //Base for 32 bit passed parameters
 	
-	uint8_t* cart_rom = (uint8_t*)*buffer32;
+	uint8_t* cart_rom = (uint8_t*)*buffer32; //Base for flash where ACE ROM is mounted (varies) 
 	buffer32++;
-//	uint8_t* ccm_ram = (uint8_t*)*buffer32;
+//	uint8_t* ccm_ram = (uint8_t*)*buffer32; //Position of CCM used by PlusCart; not used in this instance.
 	buffer32++;
-	bool (*reboot_into_cartridge_ptr)() =(bool(*)())(uint32_t)*buffer32;
+	bool (*reboot_into_cartridge_ptr)() =(bool(*)())(uint32_t)*buffer32; //Pointer to library function for removing loading screen and enterring game.
 	buffer32++;
-	void (*ReturnVector)() = (void(*)())(uint32_t)*buffer32;
+	void (*ReturnVector)() = (void(*)())(uint32_t)*buffer32; //Pointer to library function for exiting game and returning to menu.
 	buffer32++;
-	uint32_t PassedSystemCoreClock = (uint32_t)*buffer32;
+	uint32_t PassedSystemCoreClock = (uint32_t)*buffer32; //SystemCoreClock definition that is passed to game (for timer related calculations).
 //	buffer32++;
-//	uint32_t PluscartVersion = (uint32_t)*buffer32;
-	
-	uint8_t* buffer = (uint8_t*)0x20000000;
-    uint8_t* ccm = (uint8_t*)0x10000000;	
-	memset(ccm, 0x00, 0xFFFF); //Clear the CCM before running the ROM.
+//	uint32_t PluscartVersion = (uint32_t)*buffer32; //Parameter not used.
 
+// The following hardware pointers are for allowing game to work on UnoCart as well as PlusCart. The pointers live at below addresses. 
 //	volatile uint16_t** ADDR_IDR = (volatile uint16_t**)0x2000001cUL;
 //	volatile uint8_t** DATA_IDR = (volatile uint8_t**)0x20000020UL;
 //	volatile uint8_t** DATA_ODR = (volatile uint8_t**)0x20000024UL;
 //	volatile uint16_t** DATA_MODER = (volatile uint16_t**)0x20000028UL;
 
+//END OF ACE PARAMETERS//
+	SysTick_Config(PassedSystemCoreClock / 1193192);// 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
 
-
-	SysTick_Config(PassedSystemCoreClock / 21000 );// 21000?? 800 ==  ??	SystemCoreClock / 20000 // 20KHz
-
-	memcpy(buffer+0x8000, buffer+0x1c, 0x10); 
-//copy try4.bin into buffer (32kb)
-	memcpy(buffer, cart_rom, 0x8000); //try4 exists at offset 0x100 in SCRAMACE.ACE
+	
+	uint8_t* buffer = (uint8_t*)0x20000000; //Set up pointer to 128kB RAM - Used for copying game image to RAM.
+    uint8_t* ccm = (uint8_t*)0x10000000; //Set up pointer for 64kB CCM RAM - Used for DPC+ RAM. 
+	
+	memset(ccm, 0x00, 0xFFFF); //Clear the CCM before running the ROM.
+	memcpy(buffer+0x8000, buffer+0x1c, 0x10); //Copy above hardware port pointers to safety.
+	memcpy(buffer, cart_rom, 0x8000); //Copy game image into RAM.
 	memcpy(buffer+0x1c,buffer+0x8000, 0x10); //Copy the Hardware pointers back into the right spot
-	memcpy(ccm + 0xc00, buffer + 0x6c00, 0x1400); // Display and Frequency Data 5k
-//Now the DPC+ driver
+	memcpy(ccm + 0xc00, buffer + 0x6c00, 0x1400); // Copy DPC+ Display and Frequency Data 5k data into CCM.
 
-
+	//DPC+ variables
 	uint32_t systick_lastval = 0;
-
 	uint8_t prev_rom = 0;
-
     uint16_t addr, addr_prev = 0, addr_prev2 = 0, tmp_addr=0;
     uint8_t data = 0, data_prev = 0;
-
-
-//	memcpy(ccm, buffer, 0xc00); // DPC+ ARM Driver code (not really needed)
-	memcpy(ccm + 0xc00, buffer + 0x6c00, 0x1400); // Display and Frequency Data 5k
-//	memcpy(ccm + 0x1c00, buffer + 0x3d00, 0x3b); // Display and Frequency Data 5k
-
 	uint8_t *myProgramImage = buffer + 3*1024, *bankPtr = buffer + 23*1024;
 	uint8_t *myDisplayImage = ccm + 0xc00, *myFrequencyImage = ccm + 0x1c00;
 	uint32_t myFractionalCounters[8] = {0,0,0,0,0,0,0,0};
@@ -71,15 +70,11 @@ int emulate_ACEROM_cartridge()
     uint8_t myParameterPointer = 0;
     unsigned char index, function;
 
-
-
     // Datafetcher copy stuff for CALLFUNCTION PARAMETER
     uint8_t *source = NULL, *destination = NULL;
     uint8_t myDataFetcherCopyPointer = 0, myDataFetcherCopyType = 0, myDataFetcherCopyValue = 0;
 
-
 	uint32_t thumb_code_entry_point = 0x20000c09;
-//    uint32_t thumb_code_entry_point = (uint32_t) (buffer + 0x0c0b);
 
     // Older DPC+ driver code had different behaviour wrt the mask used
     // to retrieve 'DFxFRACLOW' (fractional data pointer low byte)
@@ -92,8 +87,9 @@ int emulate_ACEROM_cartridge()
 	// Initialise the DPC's random number generator register
 	uint32_t myRandomNumber = 0x70435044; // "DPCp";
 
+#define DELAY_tADS      {__asm__ __volatile__("nop");__asm__ __volatile__("nop");} //Delay to work stably on *some* consoles.
 
-   if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1;
+   if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1; //Remove menu and start game
 
     __disable_irq();	// Disable interrupts
 
@@ -105,7 +101,7 @@ int emulate_ACEROM_cartridge()
             addr_prev2 = addr_prev;
             addr_prev = addr;
         }
-
+		
 		// got a stable address
 		if (addr & 0x1000)
 		{ // A12 high
@@ -345,51 +341,37 @@ int emulate_ACEROM_cartridge()
 			        	    		  //
 			        	    case 255: // call without IRQ driven audio
 			        	    	// wait for the next address (which is the address we send PC back later)
+
 			        	    	while ((addr = ADDR_IN) != addr_prev) addr_prev = addr;
 				        	    DATA_OUT = 0xEA;				// (NOP)
 				        	    SET_DATA_MODE_OUT;
-				        	    // check Parameter flag and copy and reset myParameterPointer and Flag.
-				        	    // but maybe multiple copy tasks have to be done..
-//				        	    while(myCopyRequestCounter > 0){
-// 	 	 	 	 	 	 	 	 	 if(myCopyRequestType[myCopyRequestCounter] == 1){
-	//						  	  	  	  source = &myProgramImage[myCopyRequestParameter_01[myCopyRequestCounter] ];
-		//					  	  	  	  destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
-			//        	      	  	  	  for(int i = 0; i < myCopyRequestParameter_3[myCopyRequestCounter]; ++i)
-//			        	    	  	  	  	  destination[i] = source[i];
- //	 	 	 	 	 	 	 	 	 }else{
- 	// 	 	 	 	 	 	 	 	   	  destination = &myDisplayImage[myCounters[myParameter[2]]];
-		//	        	      	  	  	  for(int i = 0; i < myCopyRequestParameter_3[myCopyRequestCounter]; ++i)
-			//        	      	  	  	  	  destination[i] = (uint8_t)myCopyRequestParameter_01[myCopyRequestCounter] & 0xff;
- 	 	 	 //	 	 	 	 	 	 }
-				//					myCopyRequestCounter--;
-				  //      	    }
 
 			        	    	((int (*)())thumb_code_entry_point)();
-			        	    	// disable_irq_timer();
-			        	    	// __disable_irq();
+
 			    				// now send the VCS Program Counter to last address
 			        	    	addr = ADDR_IN;
 				        	    while (ADDR_IN == addr);
 
+								DELAY_tADS;
 			        	    	addr = ADDR_IN;
 				        	    DATA_OUT = 0x4C;				// (JMP)
-                                SET_DATA_MODE_OUT;
-				        	    while (ADDR_IN == addr);
 
+				        	    while (ADDR_IN == addr);								
+
+								DELAY_tADS;
 			        	    	addr = ADDR_IN;
 				        	    DATA_OUT = (uint8_t)(addr_prev & 0xff);	// (Low Byte of new addr)
-                                SET_DATA_MODE_OUT;
+
 				        	    while (ADDR_IN == addr);
 
+								DELAY_tADS;
 			        	    	addr = ADDR_IN;
 				        	    DATA_OUT = (uint8_t)(addr_prev >> 8);	// (High Byte of new addr)
-                                SET_DATA_MODE_OUT;								
+
+								
 			        	    	addr_prev = addr;				// set addr_prev for next loop
 				        	    while (ADDR_IN == addr);
 				        	    SET_DATA_MODE_IN;
-
-
-
 
 				        	  break;
 			        	    default:  // reserved
@@ -499,15 +481,16 @@ int emulate_ACEROM_cartridge()
 				SET_DATA_MODE_OUT;
 
 				if(myDataFetcherCopyType == 0){
-	uint32_t systick = SysTick->VAL; 
-	if (systick > systick_lastval){ 
-		myMusicCounters[0] += myMusicFrequencies[0]; 
-		myMusicCounters[1] += myMusicFrequencies[1]; 
-		myMusicCounters[2] += myMusicFrequencies[2]; 
-	} 
-	systick_lastval = systick; 		
-					while (ADDR_IN == addr)
-						;
+//					uint32_t systick = SysTick->VAL; 
+//					uint32_t systick_clocks = systick-systick_lastval;
+					if (SysTick->VAL >= 110){ 
+						myMusicCounters[0] += (((myMusicFrequencies[0])*5)>>2); 
+						myMusicCounters[1] += (((myMusicFrequencies[1])*5)>>2); 
+						myMusicCounters[2] += (((myMusicFrequencies[2])*5)>>2); 
+						SysTick->VAL=SysTick->VAL-110;
+					} 
+	
+					while (ADDR_IN == addr);
 				}else{
 					while (ADDR_IN == addr){
 						// move copy routine for data fetchers here (non blocking !)
@@ -530,7 +513,7 @@ int emulate_ACEROM_cartridge()
 		}
 	}
 
-	__enable_irq();
+	__enable_irq(); //Prepare to end game and return to menu.
 
 	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
 	SET_DATA_MODE_OUT;
@@ -540,16 +523,9 @@ int emulate_ACEROM_cartridge()
 	DATA_OUT = 0x00;                  // (BRK)
 	while (ADDR_IN == addr);
 
-	((void (*)())ReturnVector)();
+	((void (*)())ReturnVector)(); //Load menu. Note, not required here.
 
 	return 0;
-
-
-
-
-
-
-
 
 }
 
