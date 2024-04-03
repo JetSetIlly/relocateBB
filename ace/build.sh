@@ -9,7 +9,7 @@ WARNINGS="-Wall -Wswitch-default -Wswitch-enum -Wconversion"
 FLGS="-mcpu=cortex-m4 -mthumb -std=gnu11 -DUSE_HAL_DRIVER -DSTM32F407xx -DVERSION="2.3.17" -DUNOCART=1 -DPLUSCART=2 -DHARDWARE_TYPE=PLUSCART -DMENU_TYPE=PLUSCART -DUSE_WIFI=1 -DUSE_SD_CARD=0 -ffunction-sections -fdata-sections -fPIC -MMD -MP -mfpu=fpv4-sp-d16 -mfloat-abi=hard" 
 
 DWARF="-g3 -gdwarf-4 -gstrict-dwarf"
-OPT="-O2"
+OPT="-O3"
 
 LNKFLGS="-mcpu=cortex-m4 -mthumb -static -specs=nano.specs -fpic -mfpu=fpv4-sp-d16 -mfloat-abi=hard -lc -lm -nostartfiles" 
 

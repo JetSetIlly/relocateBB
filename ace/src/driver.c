@@ -12,6 +12,8 @@
 /* 
   PlusCart/Unocart Unified ACE Driver for DPC+
   v1.02 2024-03-21 
+  v1.03 2024-04-03
+  v1.04 2024-04-03 
   
   This source is compiled and included in bB games compiled for PlusCart/Unocart.
   Based off cartridge_emulation_dpcp.c Created on: 07.07.2020 Author: stubig, adaption to ACE by Marco Johannes and JetSetIlly
