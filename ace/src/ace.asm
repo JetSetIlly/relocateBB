@@ -26,7 +26,7 @@ ACE-Driver:
 ;
 ; finally, the driver name should be exactly string 16 chars wide exactly 
 ;                "                "
-			dc.b "DPCp v1.03      "
+			dc.b "DPCp v1.02      "
 
 ACE-Driver-Version:	
 			.byte $00

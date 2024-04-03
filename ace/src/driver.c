@@ -12,7 +12,6 @@
 /* 
   PlusCart/Unocart Unified ACE Driver for DPC+
   v1.02 2024-03-21 
-  v1.03 2024-04-03
   
   This source is compiled and included in bB games compiled for PlusCart/Unocart.
   Based off cartridge_emulation_dpcp.c Created on: 07.07.2020 Author: stubig, adaption to ACE by Marco Johannes and JetSetIlly
@@ -72,13 +71,8 @@ int emulate_ACEROM_cartridge()
     unsigned char index, function;
 
     // Datafetcher copy stuff for CALLFUNCTION PARAMETER
-	#define PARAMETER_QUEUE_LEN 10
-    uint8_t *source[PARAMETER_QUEUE_LEN] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
-		   	*destination[PARAMETER_QUEUE_LEN] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-    uint8_t myDataFetcherCopyPointer[PARAMETER_QUEUE_LEN] = {0,0,0,0,0,0,0,0,0,0},
-			myDataFetcherCopyType[PARAMETER_QUEUE_LEN] = {0,0,0,0,0,0,0,0,0,0},
-			myDataFetcherCopyValue[PARAMETER_QUEUE_LEN] = {0,0,0,0,0,0,0,0,0,0};
-	int myDataFetcherCopyIdx = -1;
+    uint8_t *source = NULL, *destination = NULL;
+    uint8_t myDataFetcherCopyPointer = 0, myDataFetcherCopyType = 0, myDataFetcherCopyValue = 0;
 
 	uint32_t thumb_code_entry_point = 0x20000c09;
 
@@ -94,7 +88,6 @@ int emulate_ACEROM_cartridge()
 	uint32_t myRandomNumber = 0x70435044; // "DPCp";
 
 #define DELAY_tADS      {__asm__ __volatile__("nop");__asm__ __volatile__("nop");} //Delay to work stably on *some* consoles.
-//#define DELAY_tADS      SET_DATA_MODE_OUT;
 
    if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1; //Remove menu and start game
 
@@ -314,20 +307,31 @@ int emulate_ACEROM_cartridge()
 			        	      myParameterPointer = 0;
 			        	      break;
 			        	    case 1: // Copy ROM to fetcher
-			        	      //DMA2_Stream0->
-							  myDataFetcherCopyIdx++;
-			        	      myDataFetcherCopyPointer[myDataFetcherCopyIdx] = myParameter[3];
-			        	      myDataFetcherCopyType[myDataFetcherCopyIdx] = (uint8_t) data_prev;
-			        	      source[myDataFetcherCopyIdx] = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];
-			        	      destination[myDataFetcherCopyIdx] = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
+			        	    	//DMA2_Stream0->
+			        	    	myDataFetcherCopyPointer = myParameter[3];
+			        	    	myDataFetcherCopyType = (uint8_t) data_prev;
+
+//			        	    	source = &myProgramImage[ (*((uint16_t*)&myParameter[0])) ];
+			        	    	source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];
+
+			        	    	destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
+//			        	    	for(int i = 0; i < myParameter[3]; ++i)
+//			        	    		destination[i] = source[i];
+
+//				        	  	mROMdata = ((uint16_t)myParameter[1] << 8) + myParameter[0];
+//				        		tmp_addr = myCounters[myParameter[2] & 0x7];
+//			        	    	for(int i = 0; i < myParameter[3]; ++i)
+//			        	      		myDisplayImage[tmp_addr+i] = myProgramImage[mROMdata+i];
+
 							  myParameterPointer = 0;
 			        	      break;
 			        	    case 2: // Copy value to fetcher
-								myDataFetcherCopyIdx++;
-			        	    	myDataFetcherCopyPointer[myDataFetcherCopyIdx] = myParameter[3];
-			        	    	myDataFetcherCopyType[myDataFetcherCopyIdx] = (uint8_t) data_prev;
-			        	    	destination[myDataFetcherCopyIdx] = &myDisplayImage[myCounters[myParameter[2]]];
-			        	    	myDataFetcherCopyValue[myDataFetcherCopyIdx] =  myParameter[0];
+			        	    	myDataFetcherCopyPointer = myParameter[3];
+			        	    	myDataFetcherCopyType = (uint8_t) data_prev;
+			        	    	destination = &myDisplayImage[myCounters[myParameter[2]]];
+			        	    	myDataFetcherCopyValue =  myParameter[0];
+//			        	    	for(int i = 0; i < myParameter[3]; ++i)
+//			        	    		destination[i] = myParameter[0];
 			        	    	myParameterPointer = 0;
 			        	    	break;
 			        	      // Call user written ARM code (most likely be C compiled for ARM)
@@ -476,7 +480,7 @@ int emulate_ACEROM_cartridge()
 				DATA_OUT = prev_rom;
 				SET_DATA_MODE_OUT;
 
-				if (myDataFetcherCopyIdx < 0) {
+				if(myDataFetcherCopyType == 0){
 //					uint32_t systick = SysTick->VAL; 
 //					uint32_t systick_clocks = systick-systick_lastval;
 					if (SysTick->VAL >= 110){ 
@@ -490,15 +494,14 @@ int emulate_ACEROM_cartridge()
 				}else{
 					while (ADDR_IN == addr){
 						// move copy routine for data fetchers here (non blocking !)
-						--myDataFetcherCopyPointer[myDataFetcherCopyIdx];
-						if(myDataFetcherCopyType[myDataFetcherCopyIdx] == 1){
-							destination[myDataFetcherCopyIdx][myDataFetcherCopyPointer[myDataFetcherCopyIdx]] = source[myDataFetcherCopyIdx][myDataFetcherCopyPointer[myDataFetcherCopyIdx]];
+						--myDataFetcherCopyPointer;
+						if(myDataFetcherCopyType == 1){
+							destination[myDataFetcherCopyPointer] = source[myDataFetcherCopyPointer];
 						}else{ // if(myDataFetcherCopyType == 2){
-							destination[myDataFetcherCopyIdx][myDataFetcherCopyPointer[myDataFetcherCopyIdx]] = myDataFetcherCopyValue[myDataFetcherCopyIdx];
+							destination[myDataFetcherCopyPointer] = myDataFetcherCopyValue;
 						}
-						if(myDataFetcherCopyPointer[myDataFetcherCopyIdx] == 0){
-							myDataFetcherCopyType[myDataFetcherCopyIdx] = 0;
-							myDataFetcherCopyIdx--;
+						if(myDataFetcherCopyPointer == 0){
+							myDataFetcherCopyType = 0;
 							while (ADDR_IN == addr)
 								;
 							break;
@@ -510,17 +513,17 @@ int emulate_ACEROM_cartridge()
 		}
 	}
 
-	/* __enable_irq(); //Prepare to end game and return to menu. */
+	__enable_irq(); //Prepare to end game and return to menu.
 
-	/* DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB */
-	/* SET_DATA_MODE_OUT; */
-	/* while (ADDR_IN == addr); */
+	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
+	SET_DATA_MODE_OUT;
+	while (ADDR_IN == addr);
 
-	/* addr = ADDR_IN; */
-	/* DATA_OUT = 0x00;                  // (BRK) */
-	/* while (ADDR_IN == addr); */
+	addr = ADDR_IN;
+	DATA_OUT = 0x00;                  // (BRK)
+	while (ADDR_IN == addr);
 
-	/* ((void (*)())ReturnVector)(); //Load menu. Note, not required here. */
+	((void (*)())ReturnVector)(); //Load menu. Note, not required here.
 
 	return 0;
 
