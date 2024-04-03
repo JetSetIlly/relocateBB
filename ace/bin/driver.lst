@@ -27,7 +27,7 @@
      26  0008							;
      27  0008							; finally, the driver name should be exactly string 16 chars wide exactly
      28  0008							;		  "		   "
-     29  0008		       44 50 43 70*	      dc.b	"DPCp v1.02	  "
+     29  0008		       44 50 43 70*	      dc.b	"DPCp v1.03	  "
      30  0018
      31  0018				   ACE-Driver-Version
      32  0018		       00		      .byte.b	$00
@@ -51,7 +51,7 @@
      50  0030		       00		      align	16
      51  0030				   ARMCODE
      52  0030					      incbin	"driver.bin"
-     53  0bd0
+     53  097e
      54  0bff					      org	$0bff
      55  0bff		       00		      .byte.b	$00
      56  0c00
