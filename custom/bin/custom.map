@@ -20,7 +20,7 @@ Memory Configuration
 Name             Origin             Length             Attributes
 boot             0x0000000020000c00 0x0000000000000080 xr
 C_code           0x0000000020000c80 0x0000000000005400 xr
-ram              0x0000000010001c00 0x0000000000000200
+ram              0x0000000020011c00 0x0000000000000200
 *default*        0x0000000000000000 0xffffffffffffffff
 
 Linker script and memory map
@@ -32,7 +32,7 @@ LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc
 LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a
 LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libc.a
 END GROUP
-                0x0000000010001fdc                _stack_end = 0x10001fdc
+                0x0000000020011fdc                _stack_end = 0x20011fdc
 
 .bootcode       0x0000000020000c00       0x50
                 0x0000000020000c00                _sboot = .
@@ -107,42 +107,42 @@ END GROUP
 .rel.dyn        0x00000000200013d0        0x0
  .rel.iplt      0x00000000200013d0        0x0 custom.o
 
-.data           0x0000000010001c00       0x2c load address 0x00000000200013d0
-                0x0000000010001c00                . = ALIGN (0x4)
-                0x0000000010001c00                _sdata = .
+.data           0x0000000020011c00       0x2c load address 0x00000000200013d0
+                0x0000000020011c00                . = ALIGN (0x4)
+                0x0000000020011c00                _sdata = .
  *(.data)
- .data          0x0000000010001c00       0x2c main.o
-                0x0000000010001c00                RIOT
-                0x0000000010001c04                queue
-                0x0000000010001c08                flashdata
-                0x0000000010001c0c                C_function
-                0x0000000010001c10                fetcher_address_table
-                0x0000000010001c14                myGfxIndex
-                0x0000000010001c1e                spritesort
-                0x0000000010001c28                queue_int
+ .data          0x0000000020011c00       0x2c main.o
+                0x0000000020011c00                RIOT
+                0x0000000020011c04                queue
+                0x0000000020011c08                flashdata
+                0x0000000020011c0c                C_function
+                0x0000000020011c10                fetcher_address_table
+                0x0000000020011c14                myGfxIndex
+                0x0000000020011c1e                spritesort
+                0x0000000020011c28                queue_int
  *(.data.*)
-                0x0000000010001c2c                . = ALIGN (0x4)
-                0x0000000010001c2c                _edata = .
+                0x0000000020011c2c                . = ALIGN (0x4)
+                0x0000000020011c2c                _edata = .
 
-.igot.plt       0x0000000010001c2c        0x0 load address 0x00000000200013fc
- .igot.plt      0x0000000010001c2c        0x0 custom.o
+.igot.plt       0x0000000020011c2c        0x0 load address 0x00000000200013fc
+ .igot.plt      0x0000000020011c2c        0x0 custom.o
 
-.bss            0x0000000010001c2c       0x1c load address 0x00000000200013fc
-                0x0000000010001c2c                . = ALIGN (0x4)
-                0x0000000010001c2c                _sbss = .
+.bss            0x0000000020011c2c       0x1c load address 0x00000000200013fc
+                0x0000000020011c2c                . = ALIGN (0x4)
+                0x0000000020011c2c                _sbss = .
  *(.bss)
- .bss           0x0000000010001c2c       0x1c main.o
-                0x0000000010001c2c                mask
-                0x0000000010001c30                fetcheraddr
-                0x0000000010001c34                temp5
-                0x0000000010001c38                pfpixel
-                0x0000000010001c3c                maxsprites
-                0x0000000010001c40                temp4
-                0x0000000010001c44                count
+ .bss           0x0000000020011c2c       0x1c main.o
+                0x0000000020011c2c                mask
+                0x0000000020011c30                fetcheraddr
+                0x0000000020011c34                temp5
+                0x0000000020011c38                pfpixel
+                0x0000000020011c3c                maxsprites
+                0x0000000020011c40                temp4
+                0x0000000020011c44                count
  *(COMMON)
-                0x0000000010001c48                . = ALIGN (0x4)
-                0x0000000010001c48                _ebss = .
-                0x0000000010001c48                end = .
+                0x0000000020011c48                . = ALIGN (0x4)
+                0x0000000020011c48                _ebss = .
+                0x0000000020011c48                end = .
 OUTPUT(bin/custom.elf elf32-littlearm)
 LOAD linker stubs
 

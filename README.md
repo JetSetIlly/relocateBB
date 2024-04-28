@@ -53,10 +53,10 @@ The driver code is mostly the same as found in the Batari Basic [include/custom]
 
 The most significant change is to the address space the program operates with. The first group of addresses are found in the `custom.S` and `custom.boot.S` files. The table below summarises how address ranges are changed.
 
-| Old Origin | Old Memtop| New Origin | New Memtop |
-|------------|-----------|------------|------------|
-| `0x00000000` | `0x0fffffff` | `0x20000000` | `0x2fffffff` |
-| `0x40000000` | `0x4fffffff` | `0x10000000` | `0x1fffffff` |
+| Old Origin   | Old Memtop   | New Origin   | New Memtop   |
+|--------------|--------------|--------------|--------------|
+| `0x00000000` | `0x0fffffff` | `0x20000000` | `0x2000ffff` |
+| `0x40000000` | `0x4fffffff` | `0x20010000` | `0x20017fff` |
 
 Addresses are also found in the `main.c` file. These are changed in the same way.
 

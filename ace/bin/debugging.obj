@@ -5,1494 +5,1470 @@ bin/debugging.elf:     file format elf32-littlearm
 Disassembly of section .text.emulate_ACEROM_cartridge:
 
 08020030 <emulate_ACEROM_cartridge>:
+  This source is compiled and included in bB games compiled for PlusCart/Unocart.
+  Based off cartridge_emulation_dpcp.c Created on: 07.07.2020 Author: stubig, adaption to ACE by Marco Johannes and JetSetIlly
+*/
+
 int emulate_ACEROM_cartridge()
 {
+ 8020030:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
 	// Setup the function pointers out of memory
 	uint32_t* buffer32 = (uint32_t*)0x20000000; //Base for 32 bit passed parameters
 	
 	uint8_t* cart_rom = (uint8_t*)*buffer32; //Base for flash where ACE ROM is mounted (varies) 
- 8020030:	f04f 5200 	mov.w	r2, #536870912	; 0x20000000
-//	volatile uint8_t** DATA_IDR = (volatile uint8_t**)0x20000020UL;
-//	volatile uint8_t** DATA_ODR = (volatile uint8_t**)0x20000024UL;
-//	volatile uint16_t** DATA_MODER = (volatile uint16_t**)0x20000028UL;
-
-//END OF ACE PARAMETERS//
-	SysTick_Config(PassedSystemCoreClock / 1193192);// 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
- 8020034:	49a6      	ldr	r1, [pc, #664]	; (80202d0 <emulate_ACEROM_cartridge+0x2a0>)
- 8020036:	6913      	ldr	r3, [r2, #16]
+ 8020034:	f04f 5600 	mov.w	r6, #536870912	; 0x20000000
 {
- 8020038:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
-	SysTick_Config(PassedSystemCoreClock / 1193192);// 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
- 802003c:	fba1 1303 	umull	r1, r3, r1, r3
- 8020040:	0cdb      	lsrs	r3, r3, #19
-           function <b>SysTick_Config</b> is not included. In this case, the file <b><i>device</i>.h</b>
-           must contain a vendor-specific implementation of this function.
- */
-__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
-{
-  if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk)
- 8020042:	3b01      	subs	r3, #1
- 8020044:	f1b3 7f80 	cmp.w	r3, #16777216	; 0x1000000
-	uint8_t* cart_rom = (uint8_t*)*buffer32; //Base for flash where ACE ROM is mounted (varies) 
- 8020048:	6816      	ldr	r6, [r2, #0]
+ 8020038:	b0a3      	sub	sp, #140	; 0x8c
+	buffer32++;
+//	uint8_t* dpcram_ram = (uint8_t*)*buffer32; //Position of dpcram used by PlusCart; not used in this instance.
+	buffer32++;
 	bool (*reboot_into_cartridge_ptr)() =(bool(*)())(uint32_t)*buffer32; //Pointer to library function for removing loading screen and enterring game.
- 802004a:	6897      	ldr	r7, [r2, #8]
-{
- 802004c:	b0a7      	sub	sp, #156	; 0x9c
- 802004e:	d20a      	bcs.n	8020066 <emulate_ACEROM_cartridge+0x36>
-  {
-    return (1UL);                                                   /* Reload value impossible */
-  }
+	buffer32++;
+	void (*ReturnToMenu)() = (void(*)())(uint32_t)*buffer32; //Pointer to library function for exiting game and returning to menu.
+ 802003a:	68f3      	ldr	r3, [r6, #12]
+	uint8_t* cart_rom = (uint8_t*)*buffer32; //Base for flash where ACE ROM is mounted (varies) 
+ 802003c:	f8d6 c000 	ldr.w	ip, [r6]
+	buffer32++;
+	uint32_t PassedSystemCoreClock = (uint32_t)*buffer32; //SystemCoreClock definition that is passed to game (for timer related calculations).
+ 8020040:	6932      	ldr	r2, [r6, #16]
+	bool (*reboot_into_cartridge_ptr)() =(bool(*)())(uint32_t)*buffer32; //Pointer to library function for removing loading screen and enterring game.
+ 8020042:	f8d6 a008 	ldr.w	sl, [r6, #8]
+//END OF ACE PARAMETERS//
+//	SysTick_Config(PassedSystemCoreClock / 100 );// 1182298 PAL / 1193192 NTSC ? 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
 
-  SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
- 8020050:	f04f 22e0 	mov.w	r2, #3758153728	; 0xe000e000
-    SCB->SHP[(((uint32_t)IRQn) & 0xFUL)-4UL] = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
- 8020054:	499f      	ldr	r1, [pc, #636]	; (80202d4 <emulate_ACEROM_cartridge+0x2a4>)
-  SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
- 8020056:	6153      	str	r3, [r2, #20]
-    SCB->SHP[(((uint32_t)IRQn) & 0xFUL)-4UL] = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
- 8020058:	23f0      	movs	r3, #240	; 0xf0
- 802005a:	f881 3023 	strb.w	r3, [r1, #35]	; 0x23
-  NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Interrupt */
-  SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
- 802005e:	2100      	movs	r1, #0
-  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
- 8020060:	2307      	movs	r3, #7
-  SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
- 8020062:	6191      	str	r1, [r2, #24]
-  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
- 8020064:	6113      	str	r3, [r2, #16]
+
+	//Set up the TIM2 counter for 20,000 Hz frequency.
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+ 8020046:	f8df 82e0 	ldr.w	r8, [pc, #736]	; 8020328 <emulate_ACEROM_cartridge+0x2f8>
+	void (*ReturnToMenu)() = (void(*)())(uint32_t)*buffer32; //Pointer to library function for exiting game and returning to menu.
+ 802004a:	9306      	str	r3, [sp, #24]
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+ 802004c:	2400      	movs	r4, #0
+	TIM2->PSC=(((PassedSystemCoreClock/2))/20000)-1; //Prescaler is based on the "20000" magic number used by DPC+. Value Should be 5399 with STM32 at 216 MHz.
+ 802004e:	4baf      	ldr	r3, [pc, #700]	; (802030c <emulate_ACEROM_cartridge+0x2dc>)
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+ 8020050:	9408      	str	r4, [sp, #32]
+	TIM2->PSC=(((PassedSystemCoreClock/2))/20000)-1; //Prescaler is based on the "20000" magic number used by DPC+. Value Should be 5399 with STM32 at 216 MHz.
+ 8020052:	fba3 3202 	umull	r3, r2, r3, r2
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+ 8020056:	f8d8 3040 	ldr.w	r3, [r8, #64]	; 0x40
 	
 	uint8_t* buffer = (uint8_t*)0x20000000; //Set up pointer to 128kB RAM - Used for copying game image to RAM.
-    uint8_t* ccm = (uint8_t*)0x10000000; //Set up pointer for 64kB CCM RAM - Used for DPC+ RAM. 
+    uint8_t* dpcram = (uint8_t*)0x20010000; //Set up pointer for 64kB dpcram RAM - Used for DPC+ RAM. 
 	
-	memset(ccm, 0x00, 0xFFFF); //Clear the CCM before running the ROM.
+
 	memcpy(buffer+0x8000, buffer+0x1c, 0x10); //Copy above hardware port pointers to safety.
- 8020066:	4c9c      	ldr	r4, [pc, #624]	; (80202d8 <emulate_ACEROM_cartridge+0x2a8>)
- 8020068:	4d9c      	ldr	r5, [pc, #624]	; (80202dc <emulate_ACEROM_cartridge+0x2ac>)
-	memset(ccm, 0x00, 0xFFFF); //Clear the CCM before running the ROM.
- 802006a:	f64f 72ff 	movw	r2, #65535	; 0xffff
- 802006e:	2100      	movs	r1, #0
- 8020070:	f04f 5080 	mov.w	r0, #268435456	; 0x10000000
- 8020074:	f000 fd5a 	bl	8020b2c <memset>
-	memcpy(buffer+0x8000, buffer+0x1c, 0x10); //Copy above hardware port pointers to safety.
- 8020078:	e894 000f 	ldmia.w	r4, {r0, r1, r2, r3}
- 802007c:	f04f 5800 	mov.w	r8, #536870912	; 0x20000000
- 8020080:	e885 000f 	stmia.w	r5, {r0, r1, r2, r3}
-	memcpy(buffer, cart_rom, 0x8000); //Copy game image into RAM.
- 8020084:	4631      	mov	r1, r6
- 8020086:	f44f 4200 	mov.w	r2, #32768	; 0x8000
- 802008a:	4640      	mov	r0, r8
- 802008c:	f000 fd40 	bl	8020b10 <memcpy>
-	memcpy(buffer+0x1c,buffer+0x8000, 0x10); //Copy the Hardware pointers back into the right spot
- 8020090:	e895 000f 	ldmia.w	r5, {r0, r1, r2, r3}
-	uint8_t *myDisplayImage = ccm + 0xc00, *myFrequencyImage = ccm + 0x1c00;
+ 802005a:	4dad      	ldr	r5, [pc, #692]	; (8020310 <emulate_ACEROM_cartridge+0x2e0>)
+ 802005c:	4fad      	ldr	r7, [pc, #692]	; (8020314 <emulate_ACEROM_cartridge+0x2e4>)
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+ 802005e:	f043 0301 	orr.w	r3, r3, #1
+ 8020062:	f8c8 3040 	str.w	r3, [r8, #64]	; 0x40
+ 8020066:	f8d8 3040 	ldr.w	r3, [r8, #64]	; 0x40
+ 802006a:	f003 0301 	and.w	r3, r3, #1
+ 802006e:	9308      	str	r3, [sp, #32]
+ 8020070:	9b08      	ldr	r3, [sp, #32]
+	TIM2->PSC=(((PassedSystemCoreClock/2))/20000)-1; //Prescaler is based on the "20000" magic number used by DPC+. Value Should be 5399 with STM32 at 216 MHz.
+ 8020072:	0bd2      	lsrs	r2, r2, #15
+ 8020074:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
+ 8020078:	3a01      	subs	r2, #1
+ 802007a:	629a      	str	r2, [r3, #40]	; 0x28
+	TIM2->EGR = TIM_EGR_UG; //Load prescaler
+ 802007c:	f04f 0901 	mov.w	r9, #1
+	TIM2->ARR=0xFFFFFFFF; //Reload value
+ 8020080:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+	TIM2->EGR = TIM_EGR_UG; //Load prescaler
+ 8020084:	f8c3 9014 	str.w	r9, [r3, #20]
+	TIM2->CR1=0; //Reset Timer Options - Count up, no divisions.
+ 8020088:	601c      	str	r4, [r3, #0]
+	TIM2->ARR=0xFFFFFFFF; //Reload value
+ 802008a:	62da      	str	r2, [r3, #44]	; 0x2c
+	TIM2->CNT=TIM2->ARR; //Set Timer to wrap around
+ 802008c:	6ada      	ldr	r2, [r3, #44]	; 0x2c
+ 802008e:	625a      	str	r2, [r3, #36]	; 0x24
+	TIM2->CR1 |= TIM_CR1_CEN; //Enable Timer
+ 8020090:	681a      	ldr	r2, [r3, #0]
+ 8020092:	ea42 0209 	orr.w	r2, r2, r9
+ 8020096:	601a      	str	r2, [r3, #0]
+	uint8_t *myProgramImage = buffer + 3*1024, *bankPtr = buffer + 23*1024;
+	uint8_t *myDisplayImage = dpcram + 0xc00, *myFrequencyImage = dpcram + 0x1c00;
 	uint32_t myFractionalCounters[8] = {0,0,0,0,0,0,0,0};
 	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
 	uint8_t  myTops[8] = {0,0,0,0,0,0,0,0}, myBottoms[8] = {0,0,0,0,0,0,0,0};
 	uint8_t  myFractionalIncrements[8] = {0,0,0,0,0,0,0,0}, myParameter[8] = {0,0,0,0,0,0,0,0};
-	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
- 8020094:	f04f 0900 	mov.w	r9, #0
+ 8020098:	ab11      	add	r3, sp, #68	; 0x44
+ 802009a:	9304      	str	r3, [sp, #16]
+	memcpy(buffer+0x8000, buffer+0x1c, 0x10); //Copy above hardware port pointers to safety.
+ 802009c:	e895 000f 	ldmia.w	r5, {r0, r1, r2, r3}
+ 80200a0:	e887 000f 	stmia.w	r7, {r0, r1, r2, r3}
+	memcpy(buffer, cart_rom, 0x8000); //Copy game image into RAM.
+ 80200a4:	4661      	mov	r1, ip
+ 80200a6:	f44f 4200 	mov.w	r2, #32768	; 0x8000
+ 80200aa:	4630      	mov	r0, r6
+ 80200ac:	f000 fd50 	bl	8020b50 <memcpy>
 	memcpy(buffer+0x1c,buffer+0x8000, 0x10); //Copy the Hardware pointers back into the right spot
- 8020098:	e884 000f 	stmia.w	r4, {r0, r1, r2, r3}
-	memcpy(ccm + 0xc00, buffer + 0x6c00, 0x1400); // Copy DPC+ Display and Frequency Data 5k data into CCM.
- 802009c:	4990      	ldr	r1, [pc, #576]	; (80202e0 <emulate_ACEROM_cartridge+0x2b0>)
- 802009e:	4891      	ldr	r0, [pc, #580]	; (80202e4 <emulate_ACEROM_cartridge+0x2b4>)
- 80200a0:	f44f 52a0 	mov.w	r2, #5120	; 0x1400
- 80200a4:	f000 fd34 	bl	8020b10 <memcpy>
+ 80200b0:	e897 000f 	ldmia.w	r7, {r0, r1, r2, r3}
+ 80200b4:	e885 000f 	stmia.w	r5, {r0, r1, r2, r3}
+	memset(dpcram, 0x00, 0x7FFF); //Clear the dpcram before running the ROM.
+ 80200b8:	f647 72ff 	movw	r2, #32767	; 0x7fff
+ 80200bc:	4621      	mov	r1, r4
+ 80200be:	4896      	ldr	r0, [pc, #600]	; (8020318 <emulate_ACEROM_cartridge+0x2e8>)
+ 80200c0:	f000 fd54 	bl	8020b6c <memset>
+	memcpy(dpcram + 0xc00, buffer + 0x6c00, 0x1400); // Copy DPC+ Display and Frequency Data 5k data into dpcram.
+ 80200c4:	4995      	ldr	r1, [pc, #596]	; (802031c <emulate_ACEROM_cartridge+0x2ec>)
+ 80200c6:	4896      	ldr	r0, [pc, #600]	; (8020320 <emulate_ACEROM_cartridge+0x2f0>)
+ 80200c8:	f44f 52a0 	mov.w	r2, #5120	; 0x1400
+ 80200cc:	f000 fd40 	bl	8020b50 <memcpy>
 	uint32_t myFractionalCounters[8] = {0,0,0,0,0,0,0,0};
- 80200a8:	2220      	movs	r2, #32
- 80200aa:	4649      	mov	r1, r9
- 80200ac:	a81e      	add	r0, sp, #120	; 0x78
- 80200ae:	f000 fd3d 	bl	8020b2c <memset>
+ 80200d0:	2220      	movs	r2, #32
+ 80200d2:	4621      	mov	r1, r4
+ 80200d4:	a81a      	add	r0, sp, #104	; 0x68
+ 80200d6:	f000 fd49 	bl	8020b6c <memset>
 	uint8_t  myTops[8] = {0,0,0,0,0,0,0,0}, myBottoms[8] = {0,0,0,0,0,0,0,0};
- 80200b2:	4b8e      	ldr	r3, [pc, #568]	; (80202ec <emulate_ACEROM_cartridge+0x2bc>)
- 80200b4:	447b      	add	r3, pc
- 80200b6:	e893 0003 	ldmia.w	r3, {r0, r1}
- 80200ba:	aa12      	add	r2, sp, #72	; 0x48
- 80200bc:	e882 0003 	stmia.w	r2, {r0, r1}
- 80200c0:	aa14      	add	r2, sp, #80	; 0x50
- 80200c2:	e882 0003 	stmia.w	r2, {r0, r1}
+ 80200da:	4b94      	ldr	r3, [pc, #592]	; (802032c <emulate_ACEROM_cartridge+0x2fc>)
+	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
+ 80200dc:	9415      	str	r4, [sp, #84]	; 0x54
+	uint8_t  myTops[8] = {0,0,0,0,0,0,0,0}, myBottoms[8] = {0,0,0,0,0,0,0,0};
+ 80200de:	447b      	add	r3, pc
+ 80200e0:	e893 0003 	ldmia.w	r3, {r0, r1}
+ 80200e4:	aa0b      	add	r2, sp, #44	; 0x2c
+ 80200e6:	e882 0003 	stmia.w	r2, {r0, r1}
 	uint8_t  myFractionalIncrements[8] = {0,0,0,0,0,0,0,0}, myParameter[8] = {0,0,0,0,0,0,0,0};
- 80200c6:	ab18      	add	r3, sp, #96	; 0x60
- 80200c8:	aa16      	add	r2, sp, #88	; 0x58
+ 80200ea:	9b04      	ldr	r3, [sp, #16]
 	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
- 80200ca:	e9cd 991a 	strd	r9, r9, [sp, #104]	; 0x68
- 80200ce:	e9cd 991c 	strd	r9, r9, [sp, #112]	; 0x70
+ 80200ec:	9409      	str	r4, [sp, #36]	; 0x24
+	uint8_t  myTops[8] = {0,0,0,0,0,0,0,0}, myBottoms[8] = {0,0,0,0,0,0,0,0};
+ 80200ee:	aa0d      	add	r2, sp, #52	; 0x34
+ 80200f0:	e882 0003 	stmia.w	r2, {r0, r1}
 	uint8_t  myFractionalIncrements[8] = {0,0,0,0,0,0,0,0}, myParameter[8] = {0,0,0,0,0,0,0,0};
- 80200d2:	e882 0003 	stmia.w	r2, {r0, r1}
- 80200d6:	e883 0003 	stmia.w	r3, {r0, r1}
-	// Initialise the DPC's random number generator register
-	uint32_t myRandomNumber = 0x70435044; // "DPCp";
+ 80200f4:	aa0f      	add	r2, sp, #60	; 0x3c
+	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
+ 80200f6:	e9cd 4413 	strd	r4, r4, [sp, #76]	; 0x4c
+	uint8_t  myFractionalIncrements[8] = {0,0,0,0,0,0,0,0}, myParameter[8] = {0,0,0,0,0,0,0,0};
+ 80200fa:	e882 0003 	stmia.w	r2, {r0, r1}
+ 80200fe:	e883 0003 	stmia.w	r3, {r0, r1}
 
-#define DELAY_tADS      {__asm__ __volatile__("nop");__asm__ __volatile__("nop");} //Delay to work stably on *some* consoles.
+	// Initialise the DPC's random number generator register
+	uint32_t myRandomNumber = 0x70435044; // "DPCp"
+	uint32_t systick_lastval=0;
+	//Initialise DMA Transfer Clock
+	RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+ 8020102:	f8d8 3030 	ldr.w	r3, [r8, #48]	; 0x30
+	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
+ 8020106:	f8ad 4028 	strh.w	r4, [sp, #40]	; 0x28
+	RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+ 802010a:	f443 0380 	orr.w	r3, r3, #4194304	; 0x400000
+	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
+ 802010e:	e9cd 4416 	strd	r4, r4, [sp, #88]	; 0x58
+ 8020112:	e9cd 4418 	strd	r4, r4, [sp, #96]	; 0x60
+	RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+ 8020116:	f8c8 3030 	str.w	r3, [r8, #48]	; 0x30
+
 
    if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1; //Remove menu and start game
- 80200da:	47b8      	blx	r7
- 80200dc:	2800      	cmp	r0, #0
- 80200de:	f000 8188 	beq.w	80203f2 <emulate_ACEROM_cartridge+0x3c2>
+ 802011a:	47d0      	blx	sl
+ 802011c:	2800      	cmp	r0, #0
+ 802011e:	f000 82b6 	beq.w	802068e <emulate_ACEROM_cartridge+0x65e>
   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
            Can only be executed in Privileged modes.
  */
 __STATIC_FORCEINLINE void __disable_irq(void)
 {
   __ASM volatile ("cpsid i" : : : "memory");
- 80200e2:	b672      	cpsid	i
-	uint8_t *myProgramImage = buffer + 3*1024, *bankPtr = buffer + 23*1024;
- 80200e4:	4b80      	ldr	r3, [pc, #512]	; (80202e8 <emulate_ACEROM_cartridge+0x2b8>)
- 80200e6:	f8df c208 	ldr.w	ip, [pc, #520]	; 80202f0 <emulate_ACEROM_cartridge+0x2c0>
+ 8020122:	b672      	cpsid	i
     __disable_irq();	// Disable interrupts
 
 	
 	while (1)
 	{ 
-        while (((addr = ADDR_IN) != addr_prev) || (addr != addr_prev2))
- 80200ea:	f8d8 501c 	ldr.w	r5, [r8, #28]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020124:	69f0      	ldr	r0, [r6, #28]
+	uint32_t myRandomNumber = 0x70435044; // "DPCp"
+ 8020126:	4b7f      	ldr	r3, [pc, #508]	; (8020324 <emulate_ACEROM_cartridge+0x2f4>)
+ 8020128:	9303      	str	r3, [sp, #12]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802012a:	8803      	ldrh	r3, [r0, #0]
+	uint32_t systick_lastval=0;
+ 802012c:	9402      	str	r4, [sp, #8]
+    uint16_t addr, addr_prev = 0;
+ 802012e:	4621      	mov	r1, r4
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020130:	b29b      	uxth	r3, r3
+ 8020132:	4299      	cmp	r1, r3
 	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
- 80200ee:	f8cd 9020 	str.w	r9, [sp, #32]
+ 8020134:	46a2      	mov	sl, r4
 	uint8_t *myProgramImage = buffer + 3*1024, *bankPtr = buffer + 23*1024;
- 80200f2:	e9cd 3c02 	strd	r3, ip, [sp, #8]
-	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
- 80200f6:	e9cd 990d 	strd	r9, r9, [sp, #52]	; 0x34
+ 8020136:	f5a7 5710 	sub.w	r7, r7, #9216	; 0x2400
 	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
- 80200fa:	e9cd 990a 	strd	r9, r9, [sp, #40]	; 0x28
- 80200fe:	e9cd 9905 	strd	r9, r9, [sp, #20]
-	uint16_t myMusicWaveforms[3] = {0,0,0}, myCounters[8] = {0,0,0,0,0,0,0,0};
- 8020102:	4649      	mov	r1, r9
-	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
- 8020104:	f8cd 9010 	str.w	r9, [sp, #16]
-    uint8_t myDataFetcherCopyPointer = 0, myDataFetcherCopyType = 0, myDataFetcherCopyValue = 0;
- 8020108:	f8cd 9004 	str.w	r9, [sp, #4]
-    uint8_t *source = NULL, *destination = NULL;
- 802010c:	f8cd 901c 	str.w	r9, [sp, #28]
- 8020110:	f8cd 9030 	str.w	r9, [sp, #48]	; 0x30
+ 802013a:	46a3      	mov	fp, r4
+ 802013c:	46a1      	mov	r9, r4
     uint8_t myParameterPointer = 0;
- 8020114:	f8cd 9024 	str.w	r9, [sp, #36]	; 0x24
-    uint8_t data = 0, data_prev = 0;
- 8020118:	464b      	mov	r3, r9
- 802011a:	464e      	mov	r6, r9
-    uint16_t addr, addr_prev = 0, addr_prev2 = 0, tmp_addr=0;
- 802011c:	464a      	mov	r2, r9
- 802011e:	46cc      	mov	ip, r9
+ 802013e:	9405      	str	r4, [sp, #20]
+	bool myFastFetch = false;
+ 8020140:	4622      	mov	r2, r4
+	uint8_t joy_status = 0;
+ 8020142:	9401      	str	r4, [sp, #4]
 	uint8_t prev_rom = 0;
- 8020120:	4648      	mov	r0, r9
- 8020122:	46cb      	mov	fp, r9
- 8020124:	f8cd 903c 	str.w	r9, [sp, #60]	; 0x3c
-}
- 8020128:	e001      	b.n	802012e <emulate_ACEROM_cartridge+0xfe>
- 802012a:	4662      	mov	r2, ip
- 802012c:	46a4      	mov	ip, r4
-        while (((addr = ADDR_IN) != addr_prev) || (addr != addr_prev2))
- 802012e:	882c      	ldrh	r4, [r5, #0]
- 8020130:	b2a4      	uxth	r4, r4
- 8020132:	45a4      	cmp	ip, r4
- 8020134:	d1f9      	bne.n	802012a <emulate_ACEROM_cartridge+0xfa>
- 8020136:	42a2      	cmp	r2, r4
- 8020138:	d1f7      	bne.n	802012a <emulate_ACEROM_cartridge+0xfa>
-            addr_prev2 = addr_prev;
-            addr_prev = addr;
-        }
-		
-		// got a stable address
+ 8020144:	46a4      	mov	ip, r4
+				for (int i=0; i<3; i++) {
+					myMusicCounters[i] += (myMusicFrequencies[i])*clocks; //Multiply music frequency incremental value by how many clocks have passed and add to counter for first waveform.
+				}	
+				
+				while (ADDR_IN == addr);
+				SET_DATA_MODE_IN;
+ 8020146:	46a0      	mov	r8, r4
+ 8020148:	9400      	str	r4, [sp, #0]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802014a:	d006      	beq.n	802015a <emulate_ACEROM_cartridge+0x12a>
+            DELAY_tADS; //Provide small delay before re-reading address
+ 802014c:	bf00      	nop
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802014e:	69f0      	ldr	r0, [r6, #28]
+			prev_rom = 0;
+ 8020150:	4619      	mov	r1, r3
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020152:	8803      	ldrh	r3, [r0, #0]
+ 8020154:	b29b      	uxth	r3, r3
+ 8020156:	4299      	cmp	r1, r3
+ 8020158:	d1f8      	bne.n	802014c <emulate_ACEROM_cartridge+0x11c>
 		if (addr & 0x1000)
- 802013a:	04e7      	lsls	r7, r4, #19
- 802013c:	d5f5      	bpl.n	802012a <emulate_ACEROM_cartridge+0xfa>
-		{ // A12 high
-
-			tmp_addr = addr; // save addr, because of possible fast fetch
-
-			if(myFastFetch && prev_rom == 0xA9 && addr > 0x107f){
- 802013e:	b109      	cbz	r1, 8020144 <emulate_ACEROM_cartridge+0x114>
- 8020140:	28a9      	cmp	r0, #169	; 0xa9
- 8020142:	d03b      	beq.n	80201bc <emulate_ACEROM_cartridge+0x18c>
-			    if(data < 0x28)
-			    	addr = data; // dont't need to add 0x1000, because: if addr < 0x28 it is also < 0x1028 :-)
+ 802015a:	04dd      	lsls	r5, r3, #19
+ 802015c:	d41d      	bmi.n	802019a <emulate_ACEROM_cartridge+0x16a>
 			}
+		} else {
+				while (ADDR_IN == addr) { data_prev = data; data = DATA_IN; }			
+ 802015e:	8801      	ldrh	r1, [r0, #0]
+ 8020160:	b289      	uxth	r1, r1
+ 8020162:	428b      	cmp	r3, r1
+ 8020164:	d10a      	bne.n	802017c <emulate_ACEROM_cartridge+0x14c>
+ 8020166:	f8d6 e020 	ldr.w	lr, [r6, #32]
+ 802016a:	4625      	mov	r5, r4
+ 802016c:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020170:	8801      	ldrh	r1, [r0, #0]
+ 8020172:	b289      	uxth	r1, r1
+ 8020174:	4299      	cmp	r1, r3
+ 8020176:	b2e4      	uxtb	r4, r4
+ 8020178:	d0f7      	beq.n	802016a <emulate_ACEROM_cartridge+0x13a>
+ 802017a:	9500      	str	r5, [sp, #0]
+			if(addr == SWCHB){
+ 802017c:	f240 2182 	movw	r1, #642	; 0x282
+ 8020180:	428b      	cmp	r3, r1
+ 8020182:	f000 8182 	beq.w	802048a <emulate_ACEROM_cartridge+0x45a>
+				if( !(data_prev & 0x1) && joy_status)
+					break;
+			}else if(addr == SWCHA){
+ 8020186:	f5b3 7f20 	cmp.w	r3, #640	; 0x280
+ 802018a:	d1e1      	bne.n	8020150 <emulate_ACEROM_cartridge+0x120>
+				joy_status = !(data_prev & 0x80);
+ 802018c:	9900      	ldr	r1, [sp, #0]
+ 802018e:	43c9      	mvns	r1, r1
+ 8020190:	f3c1 11c0 	ubfx	r1, r1, #7, #1
+ 8020194:	9101      	str	r1, [sp, #4]
 			prev_rom = 0;
-
+ 8020196:	4619      	mov	r1, r3
+ 8020198:	e7db      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			if(myFastFetch && prev_rom == 0xA9 && addr > 0x107f){
+ 802019a:	b11a      	cbz	r2, 80201a4 <emulate_ACEROM_cartridge+0x174>
+ 802019c:	f1bc 0fa9 	cmp.w	ip, #169	; 0xa9
+ 80201a0:	f000 8233 	beq.w	802060a <emulate_ACEROM_cartridge+0x5da>
 			if ( addr < 0x1028)
- 8020144:	f241 0227 	movw	r2, #4135	; 0x1027
- 8020148:	4294      	cmp	r4, r2
- 802014a:	d955      	bls.n	80201f8 <emulate_ACEROM_cartridge+0x1c8>
-
-				// wait for address bus to change
-				while (ADDR_IN == addr) ;
-				SET_DATA_MODE_IN;
-			}
+ 80201a4:	f241 0127 	movw	r1, #4135	; 0x1027
+ 80201a8:	428b      	cmp	r3, r1
+ 80201aa:	f240 819e 	bls.w	80204ea <emulate_ACEROM_cartridge+0x4ba>
 			else if ( addr < 0x1080)
- 802014c:	f5b4 5f84 	cmp.w	r4, #4224	; 0x1080
- 8020150:	d33b      	bcc.n	80201ca <emulate_ACEROM_cartridge+0x19a>
- 8020152:	f3c4 000b 	ubfx	r0, r4, #0, #12
-				}
-				//while (ADDR_IN == addr);
-			}
-			else
-			{	// check bank-switch
-				if (addr >= 0x1FF6 && addr <= 0x1FFB)	// bank-switch
- 8020156:	f5a4 52ff 	sub.w	r2, r4, #8160	; 0x1fe0
- 802015a:	3a16      	subs	r2, #22
- 802015c:	fa1f fc82 	uxth.w	ip, r2
- 8020160:	f1bc 0f05 	cmp.w	ip, #5
- 8020164:	d805      	bhi.n	8020172 <emulate_ACEROM_cartridge+0x142>
-					bankPtr = &myProgramImage[(addr - 0x1FF6 ) * 4*1024 ];
- 8020166:	0312      	lsls	r2, r2, #12
- 8020168:	f102 5200 	add.w	r2, r2, #536870912	; 0x20000000
- 802016c:	f502 6240 	add.w	r2, r2, #3072	; 0xc00
- 8020170:	9202      	str	r2, [sp, #8]
-
-				// normal rom access
-				prev_rom = bankPtr[addr&0xFFF];
- 8020172:	9a02      	ldr	r2, [sp, #8]
- 8020174:	5c10      	ldrb	r0, [r2, r0]
-				DATA_OUT = prev_rom;
- 8020176:	f8d8 2024 	ldr.w	r2, [r8, #36]	; 0x24
- 802017a:	7010      	strb	r0, [r2, #0]
-				SET_DATA_MODE_OUT;
- 802017c:	f8d8 2028 	ldr.w	r2, [r8, #40]	; 0x28
- 8020180:	f245 5c55 	movw	ip, #21845	; 0x5555
- 8020184:	f8a2 c000 	strh.w	ip, [r2]
-
-				if(myDataFetcherCopyType == 0){
- 8020188:	9a01      	ldr	r2, [sp, #4]
- 802018a:	2a00      	cmp	r2, #0
- 802018c:	d142      	bne.n	8020214 <emulate_ACEROM_cartridge+0x1e4>
-//					uint32_t systick = SysTick->VAL; 
-//					uint32_t systick_clocks = systick-systick_lastval;
-					if (SysTick->VAL >= 110){ 
- 802018e:	f04f 22e0 	mov.w	r2, #3758153728	; 0xe000e000
- 8020192:	f8d2 c018 	ldr.w	ip, [r2, #24]
- 8020196:	f1bc 0f6d 	cmp.w	ip, #109	; 0x6d
- 802019a:	d859      	bhi.n	8020250 <emulate_ACEROM_cartridge+0x220>
-						myMusicCounters[1] += (((myMusicFrequencies[1])*5)>>2); 
-						myMusicCounters[2] += (((myMusicFrequencies[2])*5)>>2); 
-						SysTick->VAL=SysTick->VAL-110;
-					} 
-	
-					while (ADDR_IN == addr);
- 802019c:	f8d8 c01c 	ldr.w	ip, [r8, #28]
- 80201a0:	465f      	mov	r7, fp
- 80201a2:	f8bc 2000 	ldrh.w	r2, [ip]
- 80201a6:	b292      	uxth	r2, r2
- 80201a8:	42a2      	cmp	r2, r4
- 80201aa:	d0fa      	beq.n	80201a2 <emulate_ACEROM_cartridge+0x172>
- 80201ac:	46bb      	mov	fp, r7
-								;
-							break;
-						}
-					}
-				}
-				SET_DATA_MODE_IN;
- 80201ae:	f8d8 2028 	ldr.w	r2, [r8, #40]	; 0x28
- 80201b2:	f04f 0700 	mov.w	r7, #0
- 80201b6:	8017      	strh	r7, [r2, #0]
- 80201b8:	46a4      	mov	ip, r4
- 80201ba:	e7b6      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			if(myFastFetch && prev_rom == 0xA9 && addr > 0x107f){
- 80201bc:	f5b4 5f84 	cmp.w	r4, #4224	; 0x1080
- 80201c0:	d262      	bcs.n	8020288 <emulate_ACEROM_cartridge+0x258>
-			if ( addr < 0x1028)
- 80201c2:	f241 0227 	movw	r2, #4135	; 0x1027
- 80201c6:	4294      	cmp	r4, r2
- 80201c8:	d916      	bls.n	80201f8 <emulate_ACEROM_cartridge+0x1c8>
+ 80201ae:	f5b3 5f84 	cmp.w	r3, #4224	; 0x1080
+ 80201b2:	f080 8267 	bcs.w	8020684 <emulate_ACEROM_cartridge+0x654>
 				function = ((addr - 0x1028) >> 3) & 0x0f;
- 80201ca:	f5a4 5281 	sub.w	r2, r4, #4128	; 0x1020
- 80201ce:	3a08      	subs	r2, #8
+ 80201b6:	f5a3 5181 	sub.w	r1, r3, #4128	; 0x1020
+ 80201ba:	3908      	subs	r1, #8
 				switch (function)
- 80201d0:	f3c2 02c7 	ubfx	r2, r2, #3, #8
- 80201d4:	3a01      	subs	r2, #1
+ 80201bc:	f3c1 01c7 	ubfx	r1, r1, #3, #8
+ 80201c0:	3901      	subs	r1, #1
 				index = addr & 0x07;
- 80201d6:	f004 0007 	and.w	r0, r4, #7
+ 80201c2:	f003 0c07 	and.w	ip, r3, #7
 				switch (function)
- 80201da:	2a09      	cmp	r2, #9
- 80201dc:	f200 842b 	bhi.w	8020a36 <emulate_ACEROM_cartridge+0xa06>
- 80201e0:	e8df f012 	tbh	[pc, r2, lsl #1]
- 80201e4:	0117020f 	.word	0x0117020f
- 80201e8:	0156013b 	.word	0x0156013b
- 80201ec:	01be0171 	.word	0x01be0171
- 80201f0:	019001ca 	.word	0x019001ca
- 80201f4:	01ec01b2 	.word	0x01ec01b2
-				index = addr & 0x07;
- 80201f8:	b2e6      	uxtb	r6, r4
- 80201fa:	4622      	mov	r2, r4
-				switch (function)
- 80201fc:	f3c2 02c7 	ubfx	r2, r2, #3, #8
- 8020200:	3a01      	subs	r2, #1
-				index = addr & 0x07;
- 8020202:	f006 0c07 	and.w	ip, r6, #7
-				switch (function)
- 8020206:	2a03      	cmp	r2, #3
- 8020208:	f200 840c 	bhi.w	8020a24 <emulate_ACEROM_cartridge+0x9f4>
- 802020c:	e8df f002 	tbb	[pc, r2]
- 8020210:	46729fc5 	.word	0x46729fc5
- 8020214:	f10b 3eff 	add.w	lr, fp, #4294967295	; 0xffffffff
- 8020218:	fa5f fe8e 	uxtb.w	lr, lr
- 802021c:	2a01      	cmp	r2, #1
- 802021e:	465f      	mov	r7, fp
- 8020220:	f10e 0e01 	add.w	lr, lr, #1
- 8020224:	f000 80c8 	beq.w	80203b8 <emulate_ACEROM_cartridge+0x388>
- 8020228:	9a07      	ldr	r2, [sp, #28]
-					while (ADDR_IN == addr){
- 802022a:	f04f 5a00 	mov.w	sl, #536870912	; 0x20000000
- 802022e:	4496      	add	lr, r2
- 8020230:	e005      	b.n	802023e <emulate_ACEROM_cartridge+0x20e>
-						if(myDataFetcherCopyPointer == 0){
- 8020232:	f01c 07ff 	ands.w	r7, ip, #255	; 0xff
-							destination[myDataFetcherCopyPointer] = myDataFetcherCopyValue;
- 8020236:	f80e 9d01 	strb.w	r9, [lr, #-1]!
-						if(myDataFetcherCopyPointer == 0){
- 802023a:	f000 80df 	beq.w	80203fc <emulate_ACEROM_cartridge+0x3cc>
-					while (ADDR_IN == addr){
- 802023e:	f8da 201c 	ldr.w	r2, [sl, #28]
- 8020242:	8812      	ldrh	r2, [r2, #0]
- 8020244:	b292      	uxth	r2, r2
- 8020246:	4294      	cmp	r4, r2
-						--myDataFetcherCopyPointer;
- 8020248:	f107 3cff 	add.w	ip, r7, #4294967295	; 0xffffffff
-					while (ADDR_IN == addr){
- 802024c:	d0f1      	beq.n	8020232 <emulate_ACEROM_cartridge+0x202>
- 802024e:	e7ad      	b.n	80201ac <emulate_ACEROM_cartridge+0x17c>
-						SysTick->VAL=SysTick->VAL-110;
- 8020250:	f8d2 c018 	ldr.w	ip, [r2, #24]
-						myMusicCounters[0] += (((myMusicFrequencies[0])*5)>>2); 
- 8020254:	9f04      	ldr	r7, [sp, #16]
-						SysTick->VAL=SysTick->VAL-110;
- 8020256:	f1ac 0c6e 	sub.w	ip, ip, #110	; 0x6e
- 802025a:	f8c2 c018 	str.w	ip, [r2, #24]
-						myMusicCounters[0] += (((myMusicFrequencies[0])*5)>>2); 
- 802025e:	9a08      	ldr	r2, [sp, #32]
- 8020260:	eb02 0282 	add.w	r2, r2, r2, lsl #2
- 8020264:	eb07 0292 	add.w	r2, r7, r2, lsr #2
- 8020268:	9204      	str	r2, [sp, #16]
-						myMusicCounters[1] += (((myMusicFrequencies[1])*5)>>2); 
- 802026a:	9a0a      	ldr	r2, [sp, #40]	; 0x28
- 802026c:	9f05      	ldr	r7, [sp, #20]
- 802026e:	eb02 0282 	add.w	r2, r2, r2, lsl #2
- 8020272:	eb07 0292 	add.w	r2, r7, r2, lsr #2
- 8020276:	9205      	str	r2, [sp, #20]
-						myMusicCounters[2] += (((myMusicFrequencies[2])*5)>>2); 
- 8020278:	9a0b      	ldr	r2, [sp, #44]	; 0x2c
- 802027a:	9f06      	ldr	r7, [sp, #24]
- 802027c:	eb02 0282 	add.w	r2, r2, r2, lsl #2
- 8020280:	eb07 0292 	add.w	r2, r7, r2, lsr #2
- 8020284:	9206      	str	r2, [sp, #24]
-						SysTick->VAL=SysTick->VAL-110;
- 8020286:	e789      	b.n	802019c <emulate_ACEROM_cartridge+0x16c>
-				data = (uint16_t) bankPtr[addr&0xFFF];
- 8020288:	9802      	ldr	r0, [sp, #8]
- 802028a:	f3c4 020b 	ubfx	r2, r4, #0, #12
- 802028e:	5c86      	ldrb	r6, [r0, r2]
-			    if(data < 0x28)
- 8020290:	2e27      	cmp	r6, #39	; 0x27
-				data = (uint16_t) bankPtr[addr&0xFFF];
- 8020292:	4610      	mov	r0, r2
-			    if(data < 0x28)
- 8020294:	f63f af5f 	bhi.w	8020156 <emulate_ACEROM_cartridge+0x126>
-			    	addr = data; // dont't need to add 0x1000, because: if addr < 0x28 it is also < 0x1028 :-)
- 8020298:	4632      	mov	r2, r6
-			if ( addr < 0x1028)
- 802029a:	e7af      	b.n	80201fc <emulate_ACEROM_cartridge+0x1cc>
-						if(index < 4)
- 802029c:	0772      	lsls	r2, r6, #29
- 802029e:	f100 81d1 	bmi.w	8020644 <emulate_ACEROM_cartridge+0x614>
-							data = (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0;
- 80202a2:	a826      	add	r0, sp, #152	; 0x98
- 80202a4:	f10c 0298 	add.w	r2, ip, #152	; 0x98
- 80202a8:	446a      	add	r2, sp
- 80202aa:	eb00 064c 	add.w	r6, r0, ip, lsl #1
- 80202ae:	f836 0c30 	ldrh.w	r0, [r6, #-48]
- 80202b2:	f812 6c50 	ldrb.w	r6, [r2, #-80]
- 80202b6:	f812 2c48 	ldrb.w	r2, [r2, #-72]
- 80202ba:	1a30      	subs	r0, r6, r0
- 80202bc:	1ab2      	subs	r2, r6, r2
- 80202be:	b2c0      	uxtb	r0, r0
- 80202c0:	b2d2      	uxtb	r2, r2
- 80202c2:	4290      	cmp	r0, r2
- 80202c4:	f04f 36ff 	mov.w	r6, #4294967295	; 0xffffffff
- 80202c8:	bfd8      	it	le
- 80202ca:	2600      	movle	r6, #0
- 80202cc:	b2f6      	uxtb	r6, r6
- 80202ce:	e026      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
- 80202d0:	707c7cc5 	.word	0x707c7cc5
- 80202d4:	e000ed00 	.word	0xe000ed00
- 80202d8:	2000001c 	.word	0x2000001c
- 80202dc:	20008000 	.word	0x20008000
- 80202e0:	20006c00 	.word	0x20006c00
- 80202e4:	10000c00 	.word	0x10000c00
- 80202e8:	20005c00 	.word	0x20005c00
- 80202ec:	00000a94 	.word	0x00000a94
- 80202f0:	70435044 	.word	0x70435044
-						data = myDisplayImage[ myFractionalCounters[index] >> 8];
- 80202f4:	aa26      	add	r2, sp, #152	; 0x98
- 80202f6:	eb02 008c 	add.w	r0, r2, ip, lsl #2
-						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
- 80202fa:	f10c 0298 	add.w	r2, ip, #152	; 0x98
- 80202fe:	eb0d 0602 	add.w	r6, sp, r2
-						data = myDisplayImage[ myFractionalCounters[index] >> 8];
- 8020302:	f850 2c20 	ldr.w	r2, [r0, #-32]
-						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
- 8020306:	f816 6c40 	ldrb.w	r6, [r6, #-64]
- 802030a:	4416      	add	r6, r2
-						data = myDisplayImage[ myFractionalCounters[index] >> 8];
- 802030c:	0a12      	lsrs	r2, r2, #8
- 802030e:	f102 5280 	add.w	r2, r2, #268435456	; 0x10000000
-						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
- 8020312:	f3c6 0613 	ubfx	r6, r6, #0, #20
- 8020316:	f840 6c20 	str.w	r6, [r0, #-32]
-						data = myDisplayImage[ myFractionalCounters[index] >> 8];
- 802031a:	f892 6c00 	ldrb.w	r6, [r2, #3072]	; 0xc00
-				DATA_OUT = data;
- 802031e:	f8d8 2024 	ldr.w	r2, [r8, #36]	; 0x24
- 8020322:	7016      	strb	r6, [r2, #0]
-				SET_DATA_MODE_OUT
- 8020324:	f8d8 c028 	ldr.w	ip, [r8, #40]	; 0x28
-				while (ADDR_IN == addr) ;
- 8020328:	f8d8 001c 	ldr.w	r0, [r8, #28]
-				SET_DATA_MODE_OUT
- 802032c:	f245 5255 	movw	r2, #21845	; 0x5555
- 8020330:	f8ac 2000 	strh.w	r2, [ip]
-				while (ADDR_IN == addr) ;
- 8020334:	465f      	mov	r7, fp
- 8020336:	8802      	ldrh	r2, [r0, #0]
- 8020338:	b292      	uxth	r2, r2
- 802033a:	42a2      	cmp	r2, r4
- 802033c:	d0fb      	beq.n	8020336 <emulate_ACEROM_cartridge+0x306>
-				SET_DATA_MODE_IN;
- 802033e:	f04f 0200 	mov.w	r2, #0
- 8020342:	f8ac 2000 	strh.w	r2, [ip]
- 8020346:	46bb      	mov	fp, r7
- 8020348:	46a4      	mov	ip, r4
+ 80201c6:	2909      	cmp	r1, #9
+ 80201c8:	f200 843f 	bhi.w	8020a4a <emulate_ACEROM_cartridge+0xa1a>
+ 80201cc:	e8df f011 	tbh	[pc, r1, lsl #1]
+ 80201d0:	01110139 	.word	0x01110139
+ 80201d4:	00d300f2 	.word	0x00d300f2
+ 80201d8:	008f00b0 	.word	0x008f00b0
+ 80201dc:	00410065 	.word	0x00410065
+ 80201e0:	000a0033 	.word	0x000a0033
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80201e4:	8801      	ldrh	r1, [r0, #0]
+ 80201e6:	b289      	uxth	r1, r1
+ 80201e8:	4299      	cmp	r1, r3
+ 80201ea:	f040 8349 	bne.w	8020880 <emulate_ACEROM_cartridge+0x850>
+ 80201ee:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80201f2:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 80201f6:	4625      	mov	r5, r4
+ 80201f8:	f89e 4000 	ldrb.w	r4, [lr]
+ 80201fc:	8801      	ldrh	r1, [r0, #0]
+ 80201fe:	b289      	uxth	r1, r1
+ 8020200:	4299      	cmp	r1, r3
+ 8020202:	b2e4      	uxtb	r4, r4
+ 8020204:	d0f7      	beq.n	80201f6 <emulate_ACEROM_cartridge+0x1c6>
+ 8020206:	9500      	str	r5, [sp, #0]
+			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
+ 8020208:	a922      	add	r1, sp, #136	; 0x88
+ 802020a:	eb01 0e4c 	add.w	lr, r1, ip, lsl #1
 			prev_rom = 0;
- 802034a:	2000      	movs	r0, #0
- 802034c:	e6ed      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
- 802034e:	aa26      	add	r2, sp, #152	; 0x98
- 8020350:	eb02 004c 	add.w	r0, r2, ip, lsl #1
- 8020354:	f10c 0298 	add.w	r2, ip, #152	; 0x98
- 8020358:	eb0d 0602 	add.w	r6, sp, r2
- 802035c:	f830 2c30 	ldrh.w	r2, [r0, #-48]
- 8020360:	f816 cc50 	ldrb.w	ip, [r6, #-80]
- 8020364:	f816 ec48 	ldrb.w	lr, [r6, #-72]
- 8020368:	ebac 0602 	sub.w	r6, ip, r2
- 802036c:	ebac 0e0e 	sub.w	lr, ip, lr
- 8020370:	f102 5c80 	add.w	ip, r2, #268435456	; 0x10000000
- 8020374:	b2f6      	uxtb	r6, r6
- 8020376:	fa5f fe8e 	uxtb.w	lr, lr
- 802037a:	4576      	cmp	r6, lr
- 802037c:	f89c cc00 	ldrb.w	ip, [ip, #3072]	; 0xc00
-						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 8020380:	f102 0201 	add.w	r2, r2, #1
-						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
- 8020384:	f04f 36ff 	mov.w	r6, #4294967295	; 0xffffffff
-						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 8020388:	f3c2 020b 	ubfx	r2, r2, #0, #12
-						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
- 802038c:	bfd8      	it	le
- 802038e:	2600      	movle	r6, #0
- 8020390:	ea06 060c 	and.w	r6, r6, ip
-						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 8020394:	f820 2c30 	strh.w	r2, [r0, #-48]
-						break;
- 8020398:	e7c1      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
-						data = myDisplayImage[myCounters[index]];
- 802039a:	aa26      	add	r2, sp, #152	; 0x98
- 802039c:	eb02 064c 	add.w	r6, r2, ip, lsl #1
- 80203a0:	f836 2c30 	ldrh.w	r2, [r6, #-48]
- 80203a4:	f102 5080 	add.w	r0, r2, #268435456	; 0x10000000
-						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 80203a8:	3201      	adds	r2, #1
- 80203aa:	f3c2 020b 	ubfx	r2, r2, #0, #12
- 80203ae:	f826 2c30 	strh.w	r2, [r6, #-48]
-						data = myDisplayImage[myCounters[index]];
- 80203b2:	f890 6c00 	ldrb.w	r6, [r0, #3072]	; 0xc00
-						break;
- 80203b6:	e7b2      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
- 80203b8:	9a0c      	ldr	r2, [sp, #48]	; 0x30
-					while (ADDR_IN == addr){
- 80203ba:	9310      	str	r3, [sp, #64]	; 0x40
- 80203bc:	eb02 0a0e 	add.w	sl, r2, lr
- 80203c0:	9a07      	ldr	r2, [sp, #28]
- 80203c2:	f04f 5b00 	mov.w	fp, #536870912	; 0x20000000
- 80203c6:	4496      	add	lr, r2
- 80203c8:	e006      	b.n	80203d8 <emulate_ACEROM_cartridge+0x3a8>
-							destination[myDataFetcherCopyPointer] = source[myDataFetcherCopyPointer];
- 80203ca:	f81a 7d01 	ldrb.w	r7, [sl, #-1]!
- 80203ce:	f80e 7d01 	strb.w	r7, [lr, #-1]!
-						if(myDataFetcherCopyPointer == 0){
- 80203d2:	f012 07ff 	ands.w	r7, r2, #255	; 0xff
- 80203d6:	d010      	beq.n	80203fa <emulate_ACEROM_cartridge+0x3ca>
-					while (ADDR_IN == addr){
- 80203d8:	f8db 301c 	ldr.w	r3, [fp, #28]
- 80203dc:	f8b3 c000 	ldrh.w	ip, [r3]
- 80203e0:	fa1f fc8c 	uxth.w	ip, ip
- 80203e4:	45a4      	cmp	ip, r4
-						--myDataFetcherCopyPointer;
- 80203e6:	f107 32ff 	add.w	r2, r7, #4294967295	; 0xffffffff
-					while (ADDR_IN == addr){
- 80203ea:	d0ee      	beq.n	80203ca <emulate_ACEROM_cartridge+0x39a>
- 80203ec:	9b10      	ldr	r3, [sp, #64]	; 0x40
- 80203ee:	46bb      	mov	fp, r7
- 80203f0:	e6dd      	b.n	80201ae <emulate_ACEROM_cartridge+0x17e>
+ 802020e:	f04f 0c00 	mov.w	ip, #0
+			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
+ 8020212:	f83e 1c30 	ldrh.w	r1, [lr, #-48]
+ 8020216:	f101 5000 	add.w	r0, r1, #536870912	; 0x20000000
+			        myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 802021a:	3101      	adds	r1, #1
+			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
+ 802021c:	f500 3080 	add.w	r0, r0, #65536	; 0x10000
+			        myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 8020220:	f3c1 010b 	ubfx	r1, r1, #0, #12
+ 8020224:	f82e 1c30 	strh.w	r1, [lr, #-48]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020228:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
+ 802022c:	f880 5c00 	strb.w	r5, [r0, #3072]	; 0xc00
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020230:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 8020232:	4619      	mov	r1, r3
+ 8020234:	e78d      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        switch (index)
+ 8020236:	f10c 31ff 	add.w	r1, ip, #4294967295	; 0xffffffff
+ 802023a:	2906      	cmp	r1, #6
+ 802023c:	f200 8432 	bhi.w	8020aa4 <emulate_ACEROM_cartridge+0xa74>
+ 8020240:	e8df f011 	tbh	[pc, r1, lsl #1]
+ 8020244:	02af02e5 	.word	0x02af02e5
+ 8020248:	02cb0300 	.word	0x02cb0300
+ 802024c:	02500250 	.word	0x02500250
+ 8020250:	0250      	.short	0x0250
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020252:	8801      	ldrh	r1, [r0, #0]
+ 8020254:	b289      	uxth	r1, r1
+ 8020256:	4299      	cmp	r1, r3
+ 8020258:	d10c      	bne.n	8020274 <emulate_ACEROM_cartridge+0x244>
+ 802025a:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802025e:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020262:	4625      	mov	r5, r4
+ 8020264:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020268:	8801      	ldrh	r1, [r0, #0]
+ 802026a:	b289      	uxth	r1, r1
+ 802026c:	4299      	cmp	r1, r3
+ 802026e:	b2e4      	uxtb	r4, r4
+ 8020270:	d0f7      	beq.n	8020262 <emulate_ACEROM_cartridge+0x232>
+ 8020272:	9500      	str	r5, [sp, #0]
+			        myCounters[index] = (uint16_t)(((data_prev & 0x0F) << 8) | (myCounters[index] & 0x00ff));
+ 8020274:	a922      	add	r1, sp, #136	; 0x88
+ 8020276:	eb01 0c4c 	add.w	ip, r1, ip, lsl #1
+ 802027a:	9900      	ldr	r1, [sp, #0]
+ 802027c:	f81c 0c30 	ldrb.w	r0, [ip, #-48]
+ 8020280:	0209      	lsls	r1, r1, #8
+ 8020282:	f401 6170 	and.w	r1, r1, #3840	; 0xf00
+ 8020286:	4301      	orrs	r1, r0
+ 8020288:	f82c 1c30 	strh.w	r1, [ip, #-48]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802028c:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 8020290:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020294:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 8020296:	4619      	mov	r1, r3
+ 8020298:	e75b      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
+ 802029a:	a922      	add	r1, sp, #136	; 0x88
+ 802029c:	eb01 0c4c 	add.w	ip, r1, ip, lsl #1
+			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80202a0:	8801      	ldrh	r1, [r0, #0]
+			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
+ 80202a2:	f83c ec30 	ldrh.w	lr, [ip, #-48]
+			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80202a6:	b289      	uxth	r1, r1
+			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
+ 80202a8:	f10e 3eff 	add.w	lr, lr, #4294967295	; 0xffffffff
+ 80202ac:	f3ce 0e0b 	ubfx	lr, lr, #0, #12
+			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80202b0:	428b      	cmp	r3, r1
+			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
+ 80202b2:	f82c ec30 	strh.w	lr, [ip, #-48]
+			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80202b6:	d10c      	bne.n	80202d2 <emulate_ACEROM_cartridge+0x2a2>
+ 80202b8:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80202bc:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 80202c0:	4625      	mov	r5, r4
+ 80202c2:	f89c 4000 	ldrb.w	r4, [ip]
+ 80202c6:	8801      	ldrh	r1, [r0, #0]
+ 80202c8:	b289      	uxth	r1, r1
+ 80202ca:	4299      	cmp	r1, r3
+ 80202cc:	b2e4      	uxtb	r4, r4
+ 80202ce:	d0f7      	beq.n	80202c0 <emulate_ACEROM_cartridge+0x290>
+ 80202d0:	9500      	str	r5, [sp, #0]
+			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
+ 80202d2:	f10e 5e00 	add.w	lr, lr, #536870912	; 0x20000000
+ 80202d6:	f50e 3e80 	add.w	lr, lr, #65536	; 0x10000
+ 80202da:	9900      	ldr	r1, [sp, #0]
+ 80202dc:	f88e 1c00 	strb.w	r1, [lr, #3072]	; 0xc00
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80202e0:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 80202e4:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80202e8:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 80202ea:	4619      	mov	r1, r3
+ 80202ec:	e731      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        switch (index)
+ 80202ee:	f1bc 0f07 	cmp.w	ip, #7
+ 80202f2:	f200 8220 	bhi.w	8020736 <emulate_ACEROM_cartridge+0x706>
+ 80202f6:	e8df f01c 	tbh	[pc, ip, lsl #1]
+ 80202fa:	0222      	.short	0x0222
+ 80202fc:	0238021a 	.word	0x0238021a
+ 8020300:	021e021e 	.word	0x021e021e
+ 8020304:	01d001d0 	.word	0x01d001d0
+ 8020308:	01d0      	.short	0x01d0
+ 802030a:	bf00      	nop
+ 802030c:	d1b71759 	.word	0xd1b71759
+ 8020310:	2000001c 	.word	0x2000001c
+ 8020314:	20008000 	.word	0x20008000
+ 8020318:	20010000 	.word	0x20010000
+ 802031c:	20006c00 	.word	0x20006c00
+ 8020320:	20010c00 	.word	0x20010c00
+ 8020324:	70435044 	.word	0x70435044
+ 8020328:	40023800 	.word	0x40023800
+ 802032c:	00000aaa 	.word	0x00000aaa
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020330:	8801      	ldrh	r1, [r0, #0]
+ 8020332:	b289      	uxth	r1, r1
+ 8020334:	428b      	cmp	r3, r1
+ 8020336:	f040 82a1 	bne.w	802087c <emulate_ACEROM_cartridge+0x84c>
+ 802033a:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802033e:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020342:	4625      	mov	r5, r4
+ 8020344:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020348:	8801      	ldrh	r1, [r0, #0]
+ 802034a:	b289      	uxth	r1, r1
+ 802034c:	4299      	cmp	r1, r3
+ 802034e:	b2e4      	uxtb	r4, r4
+ 8020350:	d0f7      	beq.n	8020342 <emulate_ACEROM_cartridge+0x312>
+ 8020352:	9500      	str	r5, [sp, #0]
+			        myCounters[index] = (uint16_t)((myCounters[index] & 0x0F00) | data_prev);
+ 8020354:	a922      	add	r1, sp, #136	; 0x88
+ 8020356:	eb01 0c4c 	add.w	ip, r1, ip, lsl #1
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802035a:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802035e:	69c8      	ldr	r0, [r1, #28]
+			        myCounters[index] = (uint16_t)((myCounters[index] & 0x0F00) | data_prev);
+ 8020360:	f83c 1c30 	ldrh.w	r1, [ip, #-48]
+ 8020364:	f401 6170 	and.w	r1, r1, #3840	; 0xf00
+ 8020368:	4329      	orrs	r1, r5
+ 802036a:	f82c 1c30 	strh.w	r1, [ip, #-48]
+			prev_rom = 0;
+ 802036e:	f04f 0c00 	mov.w	ip, #0
+ 8020372:	4619      	mov	r1, r3
+ 8020374:	e6ed      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020376:	8801      	ldrh	r1, [r0, #0]
+ 8020378:	b289      	uxth	r1, r1
+ 802037a:	428b      	cmp	r3, r1
+ 802037c:	d10c      	bne.n	8020398 <emulate_ACEROM_cartridge+0x368>
+ 802037e:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020382:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020386:	4625      	mov	r5, r4
+ 8020388:	f89e 4000 	ldrb.w	r4, [lr]
+ 802038c:	8801      	ldrh	r1, [r0, #0]
+ 802038e:	b289      	uxth	r1, r1
+ 8020390:	4299      	cmp	r1, r3
+ 8020392:	b2e4      	uxtb	r4, r4
+ 8020394:	d0f7      	beq.n	8020386 <emulate_ACEROM_cartridge+0x356>
+ 8020396:	9500      	str	r5, [sp, #0]
+			        myBottoms[index] = (uint8_t)data_prev;
+ 8020398:	f10c 0188 	add.w	r1, ip, #136	; 0x88
+ 802039c:	eb0d 0c01 	add.w	ip, sp, r1
+ 80203a0:	9900      	ldr	r1, [sp, #0]
+ 80203a2:	f80c 1c54 	strb.w	r1, [ip, #-84]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80203a6:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 80203aa:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80203ae:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 80203b0:	4619      	mov	r1, r3
+ 80203b2:	e6ce      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80203b4:	8801      	ldrh	r1, [r0, #0]
+ 80203b6:	b289      	uxth	r1, r1
+ 80203b8:	4299      	cmp	r1, r3
+ 80203ba:	d10c      	bne.n	80203d6 <emulate_ACEROM_cartridge+0x3a6>
+ 80203bc:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80203c0:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 80203c4:	4625      	mov	r5, r4
+ 80203c6:	f89e 4000 	ldrb.w	r4, [lr]
+ 80203ca:	8801      	ldrh	r1, [r0, #0]
+ 80203cc:	b289      	uxth	r1, r1
+ 80203ce:	4299      	cmp	r1, r3
+ 80203d0:	b2e4      	uxtb	r4, r4
+ 80203d2:	d0f7      	beq.n	80203c4 <emulate_ACEROM_cartridge+0x394>
+ 80203d4:	9500      	str	r5, [sp, #0]
+			        myTops[index] = (uint8_t)data_prev;
+ 80203d6:	f10c 0188 	add.w	r1, ip, #136	; 0x88
+ 80203da:	eb0d 0c01 	add.w	ip, sp, r1
+ 80203de:	9900      	ldr	r1, [sp, #0]
+ 80203e0:	f80c 1c5c 	strb.w	r1, [ip, #-92]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80203e4:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 80203e8:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80203ec:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 80203ee:	4619      	mov	r1, r3
+ 80203f0:	e6af      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80203f2:	8801      	ldrh	r1, [r0, #0]
+ 80203f4:	b289      	uxth	r1, r1
+ 80203f6:	4299      	cmp	r1, r3
+ 80203f8:	d10c      	bne.n	8020414 <emulate_ACEROM_cartridge+0x3e4>
+ 80203fa:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80203fe:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020402:	4625      	mov	r5, r4
+ 8020404:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020408:	8801      	ldrh	r1, [r0, #0]
+ 802040a:	b289      	uxth	r1, r1
+ 802040c:	4299      	cmp	r1, r3
+ 802040e:	b2e4      	uxtb	r4, r4
+ 8020410:	d0f7      	beq.n	8020402 <emulate_ACEROM_cartridge+0x3d2>
+ 8020412:	9500      	str	r5, [sp, #0]
+			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
+ 8020414:	a922      	add	r1, sp, #136	; 0x88
+ 8020416:	eb01 008c 	add.w	r0, r1, ip, lsl #2
+			        myFractionalIncrements[index] = (uint8_t) data_prev;
+ 802041a:	f10c 0188 	add.w	r1, ip, #136	; 0x88
+ 802041e:	eb0d 0c01 	add.w	ip, sp, r1
+ 8020422:	9900      	ldr	r1, [sp, #0]
+			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
+ 8020424:	f850 5c20 	ldr.w	r5, [r0, #-32]
+			        myFractionalIncrements[index] = (uint8_t) data_prev;
+ 8020428:	f80c 1c4c 	strb.w	r1, [ip, #-76]
+			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
+ 802042c:	49ab      	ldr	r1, [pc, #684]	; (80206dc <emulate_ACEROM_cartridge+0x6ac>)
+ 802042e:	4029      	ands	r1, r5
+ 8020430:	f840 1c20 	str.w	r1, [r0, #-32]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020434:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 8020438:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802043c:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 802043e:	4619      	mov	r1, r3
+ 8020440:	e687      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020442:	8801      	ldrh	r1, [r0, #0]
+ 8020444:	b289      	uxth	r1, r1
+ 8020446:	4299      	cmp	r1, r3
+ 8020448:	d10c      	bne.n	8020464 <emulate_ACEROM_cartridge+0x434>
+ 802044a:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802044e:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020452:	4625      	mov	r5, r4
+ 8020454:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020458:	8801      	ldrh	r1, [r0, #0]
+ 802045a:	b289      	uxth	r1, r1
+ 802045c:	4299      	cmp	r1, r3
+ 802045e:	b2e4      	uxtb	r4, r4
+ 8020460:	d0f7      	beq.n	8020452 <emulate_ACEROM_cartridge+0x422>
+ 8020462:	9500      	str	r5, [sp, #0]
+			        myFractionalCounters[index] = (((uint32_t)(data_prev & 0x0F)) << 16) | (myFractionalCounters[index] & 0x00ffff);
+ 8020464:	a922      	add	r1, sp, #136	; 0x88
+ 8020466:	eb01 0c8c 	add.w	ip, r1, ip, lsl #2
+ 802046a:	9900      	ldr	r1, [sp, #0]
+ 802046c:	f83c 0c20 	ldrh.w	r0, [ip, #-32]
+ 8020470:	0409      	lsls	r1, r1, #16
+ 8020472:	f401 2170 	and.w	r1, r1, #983040	; 0xf0000
+ 8020476:	4301      	orrs	r1, r0
+ 8020478:	f84c 1c20 	str.w	r1, [ip, #-32]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802047c:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 8020480:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020484:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 8020486:	4619      	mov	r1, r3
+ 8020488:	e663      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+				if( !(data_prev & 0x1) && joy_status)
+ 802048a:	9900      	ldr	r1, [sp, #0]
+ 802048c:	f011 0501 	ands.w	r5, r1, #1
+ 8020490:	f47f ae5e 	bne.w	8020150 <emulate_ACEROM_cartridge+0x120>
+ 8020494:	9901      	ldr	r1, [sp, #4]
+ 8020496:	2900      	cmp	r1, #0
+ 8020498:	f43f ae5a 	beq.w	8020150 <emulate_ACEROM_cartridge+0x120>
+			}
+			
+		}	
+	}
+	DMA2_Stream0->CR=0; //Disable any DMA transfer in progress
+	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
+ 802049c:	f04f 5200 	mov.w	r2, #536870912	; 0x20000000
+	DMA2_Stream0->CR=0; //Disable any DMA transfer in progress
+ 80204a0:	488f      	ldr	r0, [pc, #572]	; (80206e0 <emulate_ACEROM_cartridge+0x6b0>)
+	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
+ 80204a2:	6a51      	ldr	r1, [r2, #36]	; 0x24
+	DMA2_Stream0->CR=0; //Disable any DMA transfer in progress
+ 80204a4:	6105      	str	r5, [r0, #16]
+	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
+ 80204a6:	20ea      	movs	r0, #234	; 0xea
+ 80204a8:	7008      	strb	r0, [r1, #0]
+	SET_DATA_MODE_OUT;
+ 80204aa:	6a90      	ldr	r0, [r2, #40]	; 0x28
+	while (ADDR_IN == addr);
+ 80204ac:	69d1      	ldr	r1, [r2, #28]
+	SET_DATA_MODE_OUT;
+ 80204ae:	f245 5455 	movw	r4, #21845	; 0x5555
+ 80204b2:	8004      	strh	r4, [r0, #0]
+	while (ADDR_IN == addr);
+ 80204b4:	880a      	ldrh	r2, [r1, #0]
+ 80204b6:	b292      	uxth	r2, r2
+ 80204b8:	429a      	cmp	r2, r3
+ 80204ba:	d0fb      	beq.n	80204b4 <emulate_ACEROM_cartridge+0x484>
 
-	((void (*)())ReturnVector)(); //Load menu. Note, not required here.
+	addr = ADDR_IN;
+	DATA_OUT = 0x00;                  // (BRK)
+ 80204bc:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
+ 80204c0:	2400      	movs	r4, #0
+ 80204c2:	6a58      	ldr	r0, [r3, #36]	; 0x24
+	addr = ADDR_IN;
+ 80204c4:	880a      	ldrh	r2, [r1, #0]
+	DATA_OUT = 0x00;                  // (BRK)
+ 80204c6:	7004      	strb	r4, [r0, #0]
+	while (ADDR_IN == addr);
+ 80204c8:	69d9      	ldr	r1, [r3, #28]
+	addr = ADDR_IN;
+ 80204ca:	b292      	uxth	r2, r2
+	while (ADDR_IN == addr);
+ 80204cc:	880b      	ldrh	r3, [r1, #0]
+ 80204ce:	b29b      	uxth	r3, r3
+ 80204d0:	4293      	cmp	r3, r2
+ 80204d2:	d0fb      	beq.n	80204cc <emulate_ACEROM_cartridge+0x49c>
+
+	((void (*)())ReturnToMenu)();
+ 80204d4:	9b06      	ldr	r3, [sp, #24]
+ 80204d6:	4798      	blx	r3
 
 	return 0;
-
+ 80204d8:	2000      	movs	r0, #0
 }
- 80203f2:	2001      	movs	r0, #1
- 80203f4:	b027      	add	sp, #156	; 0x9c
- 80203f6:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
- 80203fa:	9b10      	ldr	r3, [sp, #64]	; 0x40
-							while (ADDR_IN == addr)
- 80203fc:	f04f 5200 	mov.w	r2, #536870912	; 0x20000000
- 8020400:	69d7      	ldr	r7, [r2, #28]
- 8020402:	883a      	ldrh	r2, [r7, #0]
- 8020404:	b292      	uxth	r2, r2
- 8020406:	42a2      	cmp	r2, r4
- 8020408:	d0fb      	beq.n	8020402 <emulate_ACEROM_cartridge+0x3d2>
-							myDataFetcherCopyType = 0;
- 802040a:	2200      	movs	r2, #0
- 802040c:	9201      	str	r2, [sp, #4]
-						--myDataFetcherCopyPointer;
- 802040e:	4693      	mov	fp, r2
- 8020410:	e6cd      	b.n	80201ae <emulate_ACEROM_cartridge+0x17e>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020412:	882a      	ldrh	r2, [r5, #0]
- 8020414:	b292      	uxth	r2, r2
- 8020416:	4294      	cmp	r4, r2
- 8020418:	d10d      	bne.n	8020436 <emulate_ACEROM_cartridge+0x406>
- 802041a:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802041e:	465f      	mov	r7, fp
- 8020420:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 8020424:	4633      	mov	r3, r6
- 8020426:	f89c 6000 	ldrb.w	r6, [ip]
- 802042a:	882a      	ldrh	r2, [r5, #0]
- 802042c:	b292      	uxth	r2, r2
- 802042e:	42a2      	cmp	r2, r4
- 8020430:	b2f6      	uxtb	r6, r6
- 8020432:	d0f7      	beq.n	8020424 <emulate_ACEROM_cartridge+0x3f4>
- 8020434:	46bb      	mov	fp, r7
-			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
- 8020436:	aa26      	add	r2, sp, #152	; 0x98
- 8020438:	eb02 0c80 	add.w	ip, r2, r0, lsl #2
-			        myFractionalIncrements[index] = (uint8_t) data_prev;
- 802043c:	f100 0298 	add.w	r2, r0, #152	; 0x98
- 8020440:	eb0d 0002 	add.w	r0, sp, r2
-			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
- 8020444:	f85c 2c20 	ldr.w	r2, [ip, #-32]
-			        myFractionalIncrements[index] = (uint8_t) data_prev;
- 8020448:	f800 3c40 	strb.w	r3, [r0, #-64]
-			        myFractionalCounters[index] = myFractionalCounters[index] & 0x0FFF00;
- 802044c:	48a3      	ldr	r0, [pc, #652]	; (80206dc <emulate_ACEROM_cartridge+0x6ac>)
- 802044e:	4010      	ands	r0, r2
- 8020450:	f84c 0c20 	str.w	r0, [ip, #-32]
-			        break;
- 8020454:	46a4      	mov	ip, r4
+ 80204da:	b023      	add	sp, #140	; 0x8c
+ 80204dc:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+			if ( addr < 0x1028)
+ 80204e0:	f241 0127 	movw	r1, #4135	; 0x1027
+ 80204e4:	428b      	cmp	r3, r1
+ 80204e6:	f63f ae66 	bhi.w	80201b6 <emulate_ACEROM_cartridge+0x186>
+				index = addr & 0x07;
+ 80204ea:	b2dc      	uxtb	r4, r3
+ 80204ec:	4619      	mov	r1, r3
+				switch (function)
+ 80204ee:	f3c1 01c7 	ubfx	r1, r1, #3, #8
+ 80204f2:	3901      	subs	r1, #1
+				index = addr & 0x07;
+ 80204f4:	f004 0007 	and.w	r0, r4, #7
+				switch (function)
+ 80204f8:	2903      	cmp	r1, #3
+ 80204fa:	f200 82cb 	bhi.w	8020a94 <emulate_ACEROM_cartridge+0xa64>
+ 80204fe:	e8df f001 	tbb	[pc, r1]
+ 8020502:	4d73      	.short	0x4d73
+ 8020504:	021d      	.short	0x021d
+						if(index < 4)
+ 8020506:	0761      	lsls	r1, r4, #29
+ 8020508:	f100 80bf 	bmi.w	802068a <emulate_ACEROM_cartridge+0x65a>
+							data = (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0;
+ 802050c:	f100 0188 	add.w	r1, r0, #136	; 0x88
+ 8020510:	eb0d 0401 	add.w	r4, sp, r1
+ 8020514:	a922      	add	r1, sp, #136	; 0x88
+ 8020516:	eb01 0040 	add.w	r0, r1, r0, lsl #1
+ 802051a:	f830 1c30 	ldrh.w	r1, [r0, #-48]
+ 802051e:	f814 0c5c 	ldrb.w	r0, [r4, #-92]
+ 8020522:	f814 4c54 	ldrb.w	r4, [r4, #-84]
+ 8020526:	1a41      	subs	r1, r0, r1
+ 8020528:	1b00      	subs	r0, r0, r4
+ 802052a:	b2c9      	uxtb	r1, r1
+ 802052c:	b2c0      	uxtb	r0, r0
+ 802052e:	4281      	cmp	r1, r0
+ 8020530:	f04f 34ff 	mov.w	r4, #4294967295	; 0xffffffff
+ 8020534:	bfd8      	it	le
+ 8020536:	2400      	movle	r4, #0
+ 8020538:	b2e4      	uxtb	r4, r4
+ 802053a:	e016      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+						data = myDisplayImage[ myFractionalCounters[index] >> 8];
+ 802053c:	a922      	add	r1, sp, #136	; 0x88
+ 802053e:	eb01 0480 	add.w	r4, r1, r0, lsl #2
+						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
+ 8020542:	f100 0188 	add.w	r1, r0, #136	; 0x88
+ 8020546:	eb0d 0001 	add.w	r0, sp, r1
+						data = myDisplayImage[ myFractionalCounters[index] >> 8];
+ 802054a:	f854 1c20 	ldr.w	r1, [r4, #-32]
+						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
+ 802054e:	f810 0c4c 	ldrb.w	r0, [r0, #-76]
+ 8020552:	4408      	add	r0, r1
+						data = myDisplayImage[ myFractionalCounters[index] >> 8];
+ 8020554:	0a09      	lsrs	r1, r1, #8
+ 8020556:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 802055a:	f501 3180 	add.w	r1, r1, #65536	; 0x10000
+						myFractionalCounters[index] = (myFractionalCounters[index] + myFractionalIncrements[index]) & 0x0fffff;
+ 802055e:	f3c0 0013 	ubfx	r0, r0, #0, #20
+ 8020562:	f844 0c20 	str.w	r0, [r4, #-32]
+						data = myDisplayImage[ myFractionalCounters[index] >> 8];
+ 8020566:	f891 4c00 	ldrb.w	r4, [r1, #3072]	; 0xc00
+				DATA_OUT = data;
+ 802056a:	6a71      	ldr	r1, [r6, #36]	; 0x24
+				addr = ADDR_IN;
+ 802056c:	9d00      	ldr	r5, [sp, #0]
+				DATA_OUT = data;
+ 802056e:	700c      	strb	r4, [r1, #0]
+				SET_DATA_MODE_OUT
+ 8020570:	f8d6 e028 	ldr.w	lr, [r6, #40]	; 0x28
+				addr = ADDR_IN;
+ 8020574:	69f0      	ldr	r0, [r6, #28]
+				SET_DATA_MODE_OUT
+ 8020576:	f245 5155 	movw	r1, #21845	; 0x5555
+ 802057a:	f8ae 1000 	strh.w	r1, [lr]
+				addr = ADDR_IN;
+ 802057e:	f8b0 c000 	ldrh.w	ip, [r0]
+ 8020582:	fa1f fc8c 	uxth.w	ip, ip
+				while (ADDR_IN == addr) ;
+ 8020586:	8801      	ldrh	r1, [r0, #0]
+ 8020588:	b289      	uxth	r1, r1
+ 802058a:	4561      	cmp	r1, ip
+ 802058c:	d0fb      	beq.n	8020586 <emulate_ACEROM_cartridge+0x556>
+				SET_DATA_MODE_IN;
+ 802058e:	9500      	str	r5, [sp, #0]
+ 8020590:	f8ae 8000 	strh.w	r8, [lr]
 			prev_rom = 0;
- 8020456:	2000      	movs	r0, #0
-			        break;
- 8020458:	e667      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 802045a:	882a      	ldrh	r2, [r5, #0]
- 802045c:	b292      	uxth	r2, r2
- 802045e:	42a2      	cmp	r2, r4
- 8020460:	d10d      	bne.n	802047e <emulate_ACEROM_cartridge+0x44e>
- 8020462:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 8020466:	465f      	mov	r7, fp
- 8020468:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 802046c:	4633      	mov	r3, r6
- 802046e:	f89c 6000 	ldrb.w	r6, [ip]
- 8020472:	882a      	ldrh	r2, [r5, #0]
- 8020474:	b292      	uxth	r2, r2
- 8020476:	42a2      	cmp	r2, r4
- 8020478:	b2f6      	uxtb	r6, r6
- 802047a:	d0f7      	beq.n	802046c <emulate_ACEROM_cartridge+0x43c>
- 802047c:	46bb      	mov	fp, r7
-			        myTops[index] = (uint8_t)data_prev;
- 802047e:	f100 0298 	add.w	r2, r0, #152	; 0x98
- 8020482:	eb0d 0002 	add.w	r0, sp, r2
-			        break;
- 8020486:	46a4      	mov	ip, r4
-			        myTops[index] = (uint8_t)data_prev;
- 8020488:	f800 3c50 	strb.w	r3, [r0, #-80]
+ 8020594:	f04f 0c00 	mov.w	ip, #0
+ 8020598:	4619      	mov	r1, r3
+ 802059a:	e5da      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
+ 802059c:	a922      	add	r1, sp, #136	; 0x88
+ 802059e:	eb01 0140 	add.w	r1, r1, r0, lsl #1
+ 80205a2:	3088      	adds	r0, #136	; 0x88
+ 80205a4:	eb0d 0c00 	add.w	ip, sp, r0
+ 80205a8:	f831 0c30 	ldrh.w	r0, [r1, #-48]
+ 80205ac:	f81c 4c5c 	ldrb.w	r4, [ip, #-92]
+ 80205b0:	f81c cc54 	ldrb.w	ip, [ip, #-84]
+ 80205b4:	eba4 0c0c 	sub.w	ip, r4, ip
+ 80205b8:	1a24      	subs	r4, r4, r0
+ 80205ba:	b2e4      	uxtb	r4, r4
+ 80205bc:	fa5f fc8c 	uxtb.w	ip, ip
+ 80205c0:	4564      	cmp	r4, ip
+ 80205c2:	f100 5c00 	add.w	ip, r0, #536870912	; 0x20000000
+ 80205c6:	f50c 3c80 	add.w	ip, ip, #65536	; 0x10000
+						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 80205ca:	f100 0001 	add.w	r0, r0, #1
+						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
+ 80205ce:	f89c cc00 	ldrb.w	ip, [ip, #3072]	; 0xc00
+ 80205d2:	f04f 34ff 	mov.w	r4, #4294967295	; 0xffffffff
+						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 80205d6:	f3c0 000b 	ubfx	r0, r0, #0, #12
+						data = (uint8_t)(myDisplayImage[myCounters[index]] & ( (((myTops[index]-(myCounters[index] & 0x00ff)) & 0xFF) > ((myTops[index]-myBottoms[index]) & 0xFF)) ? 0xFF : 0));
+ 80205da:	bfd8      	it	le
+ 80205dc:	2400      	movle	r4, #0
+ 80205de:	ea04 040c 	and.w	r4, r4, ip
+						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 80205e2:	f821 0c30 	strh.w	r0, [r1, #-48]
+						break;
+ 80205e6:	e7c0      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+						data = myDisplayImage[myCounters[index]];
+ 80205e8:	a922      	add	r1, sp, #136	; 0x88
+ 80205ea:	eb01 0040 	add.w	r0, r1, r0, lsl #1
+ 80205ee:	f830 1c30 	ldrh.w	r1, [r0, #-48]
+ 80205f2:	f101 5400 	add.w	r4, r1, #536870912	; 0x20000000
+ 80205f6:	f504 3480 	add.w	r4, r4, #65536	; 0x10000
+						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 80205fa:	3101      	adds	r1, #1
+ 80205fc:	f3c1 010b 	ubfx	r1, r1, #0, #12
+						data = myDisplayImage[myCounters[index]];
+ 8020600:	f894 4c00 	ldrb.w	r4, [r4, #3072]	; 0xc00
+						myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
+ 8020604:	f820 1c30 	strh.w	r1, [r0, #-48]
+						break;
+ 8020608:	e7af      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+			if(myFastFetch && prev_rom == 0xA9 && addr > 0x107f){
+ 802060a:	f5b3 5f84 	cmp.w	r3, #4224	; 0x1080
+ 802060e:	f4ff af67 	bcc.w	80204e0 <emulate_ACEROM_cartridge+0x4b0>
+				data = (uint16_t) bankPtr[addr&0xFFF];
+ 8020612:	f3c3 010b 	ubfx	r1, r3, #0, #12
+ 8020616:	4608      	mov	r0, r1
+ 8020618:	5c7c      	ldrb	r4, [r7, r1]
+			    if(data < 0x28)
+ 802061a:	2c27      	cmp	r4, #39	; 0x27
+ 802061c:	d93b      	bls.n	8020696 <emulate_ACEROM_cartridge+0x666>
+				if (addr >= 0x1FF6 && addr <= 0x1FFB)	// bank-switch
+ 802061e:	f5a3 51ff 	sub.w	r1, r3, #8160	; 0x1fe0
+ 8020622:	3916      	subs	r1, #22
+ 8020624:	fa1f fc81 	uxth.w	ip, r1
+ 8020628:	f1bc 0f05 	cmp.w	ip, #5
+ 802062c:	d804      	bhi.n	8020638 <emulate_ACEROM_cartridge+0x608>
+					bankPtr = &myProgramImage[(addr - 0x1FF6 ) * 4*1024 ];
+ 802062e:	0309      	lsls	r1, r1, #12
+ 8020630:	f101 5700 	add.w	r7, r1, #536870912	; 0x20000000
+ 8020634:	f507 6740 	add.w	r7, r7, #3072	; 0xc00
+				DATA_OUT = prev_rom;
+ 8020638:	6a71      	ldr	r1, [r6, #36]	; 0x24
+				prev_rom = bankPtr[addr&0xFFF];
+ 802063a:	f817 c000 	ldrb.w	ip, [r7, r0]
+				DATA_OUT = prev_rom;
+ 802063e:	f881 c000 	strb.w	ip, [r1]
+				SET_DATA_MODE_OUT;
+ 8020642:	f8d6 e028 	ldr.w	lr, [r6, #40]	; 0x28
+				uint32_t clocks = TIM2->CNT-systick_lastval; //Calculate how many times the timer has incrememented since last check
+ 8020646:	9902      	ldr	r1, [sp, #8]
+ 8020648:	f04f 4580 	mov.w	r5, #1073741824	; 0x40000000
+				SET_DATA_MODE_OUT;
+ 802064c:	f245 5055 	movw	r0, #21845	; 0x5555
+ 8020650:	f8ae 0000 	strh.w	r0, [lr]
+				uint32_t clocks = TIM2->CNT-systick_lastval; //Calculate how many times the timer has incrememented since last check
+ 8020654:	6a68      	ldr	r0, [r5, #36]	; 0x24
+ 8020656:	1a40      	subs	r0, r0, r1
+				systick_lastval=TIM2->CNT; // Log the curent value of the Timer 	
+ 8020658:	6a69      	ldr	r1, [r5, #36]	; 0x24
+ 802065a:	9102      	str	r1, [sp, #8]
+					myMusicCounters[i] += (myMusicFrequencies[i])*clocks; //Multiply music frequency incremental value by how many clocks have passed and add to counter for first waveform.
+ 802065c:	9913      	ldr	r1, [sp, #76]	; 0x4c
+				while (ADDR_IN == addr);
+ 802065e:	9d00      	ldr	r5, [sp, #0]
+					myMusicCounters[i] += (myMusicFrequencies[i])*clocks; //Multiply music frequency incremental value by how many clocks have passed and add to counter for first waveform.
+ 8020660:	fb01 9900 	mla	r9, r1, r0, r9
+ 8020664:	9914      	ldr	r1, [sp, #80]	; 0x50
+ 8020666:	fb01 bb00 	mla	fp, r1, r0, fp
+ 802066a:	9915      	ldr	r1, [sp, #84]	; 0x54
+ 802066c:	fb01 aa00 	mla	sl, r1, r0, sl
+				while (ADDR_IN == addr);
+ 8020670:	69f0      	ldr	r0, [r6, #28]
+ 8020672:	8801      	ldrh	r1, [r0, #0]
+ 8020674:	b289      	uxth	r1, r1
+ 8020676:	4299      	cmp	r1, r3
+ 8020678:	d0fb      	beq.n	8020672 <emulate_ACEROM_cartridge+0x642>
+				SET_DATA_MODE_IN;
+ 802067a:	9500      	str	r5, [sp, #0]
+ 802067c:	f8ae 8000 	strh.w	r8, [lr]
 			prev_rom = 0;
- 802048c:	2000      	movs	r0, #0
-			        break;
- 802048e:	e64c      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020490:	882a      	ldrh	r2, [r5, #0]
- 8020492:	b292      	uxth	r2, r2
- 8020494:	42a2      	cmp	r2, r4
- 8020496:	d10d      	bne.n	80204b4 <emulate_ACEROM_cartridge+0x484>
- 8020498:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802049c:	465f      	mov	r7, fp
- 802049e:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 80204a2:	4633      	mov	r3, r6
- 80204a4:	f89c 6000 	ldrb.w	r6, [ip]
- 80204a8:	882a      	ldrh	r2, [r5, #0]
- 80204aa:	b292      	uxth	r2, r2
- 80204ac:	42a2      	cmp	r2, r4
- 80204ae:	b2f6      	uxtb	r6, r6
- 80204b0:	d0f7      	beq.n	80204a2 <emulate_ACEROM_cartridge+0x472>
- 80204b2:	46bb      	mov	fp, r7
-			        myBottoms[index] = (uint8_t)data_prev;
- 80204b4:	f100 0298 	add.w	r2, r0, #152	; 0x98
- 80204b8:	eb0d 0002 	add.w	r0, sp, r2
-			        break;
- 80204bc:	46a4      	mov	ip, r4
-			        myBottoms[index] = (uint8_t)data_prev;
- 80204be:	f800 3c48 	strb.w	r3, [r0, #-72]
-			prev_rom = 0;
- 80204c2:	2000      	movs	r0, #0
-			        break;
- 80204c4:	e631      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80204c6:	882a      	ldrh	r2, [r5, #0]
- 80204c8:	b292      	uxth	r2, r2
- 80204ca:	42a2      	cmp	r2, r4
- 80204cc:	d10d      	bne.n	80204ea <emulate_ACEROM_cartridge+0x4ba>
- 80204ce:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80204d2:	465f      	mov	r7, fp
- 80204d4:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 80204d8:	4633      	mov	r3, r6
- 80204da:	f89c 6000 	ldrb.w	r6, [ip]
- 80204de:	882a      	ldrh	r2, [r5, #0]
- 80204e0:	b292      	uxth	r2, r2
- 80204e2:	42a2      	cmp	r2, r4
- 80204e4:	b2f6      	uxtb	r6, r6
- 80204e6:	d0f7      	beq.n	80204d8 <emulate_ACEROM_cartridge+0x4a8>
- 80204e8:	46bb      	mov	fp, r7
-			        myCounters[index] = (uint16_t)((myCounters[index] & 0x0F00) | data_prev);
- 80204ea:	aa26      	add	r2, sp, #152	; 0x98
- 80204ec:	eb02 0040 	add.w	r0, r2, r0, lsl #1
-			        break;
- 80204f0:	46a4      	mov	ip, r4
-			        myCounters[index] = (uint16_t)((myCounters[index] & 0x0F00) | data_prev);
- 80204f2:	f830 2c30 	ldrh.w	r2, [r0, #-48]
- 80204f6:	f402 6270 	and.w	r2, r2, #3840	; 0xf00
- 80204fa:	431a      	orrs	r2, r3
- 80204fc:	f820 2c30 	strh.w	r2, [r0, #-48]
-			prev_rom = 0;
- 8020500:	2000      	movs	r0, #0
-			        break;
- 8020502:	e612      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020504:	882a      	ldrh	r2, [r5, #0]
- 8020506:	b292      	uxth	r2, r2
- 8020508:	4294      	cmp	r4, r2
- 802050a:	d10d      	bne.n	8020528 <emulate_ACEROM_cartridge+0x4f8>
- 802050c:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 8020510:	465f      	mov	r7, fp
- 8020512:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 8020516:	4633      	mov	r3, r6
- 8020518:	f89c 6000 	ldrb.w	r6, [ip]
- 802051c:	882a      	ldrh	r2, [r5, #0]
- 802051e:	b292      	uxth	r2, r2
- 8020520:	42a2      	cmp	r2, r4
- 8020522:	b2f6      	uxtb	r6, r6
- 8020524:	d0f7      	beq.n	8020516 <emulate_ACEROM_cartridge+0x4e6>
- 8020526:	46bb      	mov	fp, r7
-			        myCounters[index] = (uint16_t)(((data_prev & 0x0F) << 8) | (myCounters[index] & 0x00ff));
- 8020528:	aa26      	add	r2, sp, #152	; 0x98
- 802052a:	eb02 0040 	add.w	r0, r2, r0, lsl #1
- 802052e:	ea4f 2c03 	mov.w	ip, r3, lsl #8
- 8020532:	f810 2c30 	ldrb.w	r2, [r0, #-48]
- 8020536:	f40c 6c70 	and.w	ip, ip, #3840	; 0xf00
- 802053a:	ea42 020c 	orr.w	r2, r2, ip
- 802053e:	f820 2c30 	strh.w	r2, [r0, #-48]
-			        break;
- 8020542:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 8020544:	2000      	movs	r0, #0
-			        break;
- 8020546:	e5f0      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        switch (index)
- 8020548:	3801      	subs	r0, #1
- 802054a:	2806      	cmp	r0, #6
- 802054c:	d87c      	bhi.n	8020648 <emulate_ACEROM_cartridge+0x618>
- 802054e:	e8df f010 	tbh	[pc, r0, lsl #1]
- 8020552:	01c8      	.short	0x01c8
- 8020554:	0166017f 	.word	0x0166017f
- 8020558:	019801b1 	.word	0x019801b1
- 802055c:	0134014d 	.word	0x0134014d
-			        switch (index)
- 8020560:	2807      	cmp	r0, #7
- 8020562:	d873      	bhi.n	802064c <emulate_ACEROM_cartridge+0x61c>
- 8020564:	e8df f010 	tbh	[pc, r0, lsl #1]
- 8020568:	00f40114 	.word	0x00f40114
- 802056c:	007200be 	.word	0x007200be
- 8020570:	00a30072 	.word	0x00a30072
- 8020574:	0075008c 	.word	0x0075008c
-			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
- 8020578:	aa26      	add	r2, sp, #152	; 0x98
- 802057a:	eb02 0040 	add.w	r0, r2, r0, lsl #1
-			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 802057e:	882a      	ldrh	r2, [r5, #0]
-			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
- 8020580:	f830 cc30 	ldrh.w	ip, [r0, #-48]
-			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020584:	b292      	uxth	r2, r2
-			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
- 8020586:	f10c 3cff 	add.w	ip, ip, #4294967295	; 0xffffffff
- 802058a:	f3cc 0c0b 	ubfx	ip, ip, #0, #12
-			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 802058e:	42a2      	cmp	r2, r4
-			        myCounters[index] = (myCounters[index] - 0x1) & 0x0fff;
- 8020590:	f820 cc30 	strh.w	ip, [r0, #-48]
-			        while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020594:	d10b      	bne.n	80205ae <emulate_ACEROM_cartridge+0x57e>
- 8020596:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802059a:	465f      	mov	r7, fp
- 802059c:	6a18      	ldr	r0, [r3, #32]
- 802059e:	4633      	mov	r3, r6
- 80205a0:	7806      	ldrb	r6, [r0, #0]
- 80205a2:	882a      	ldrh	r2, [r5, #0]
- 80205a4:	b292      	uxth	r2, r2
- 80205a6:	42a2      	cmp	r2, r4
- 80205a8:	b2f6      	uxtb	r6, r6
- 80205aa:	d0f8      	beq.n	802059e <emulate_ACEROM_cartridge+0x56e>
- 80205ac:	46bb      	mov	fp, r7
-			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
- 80205ae:	f10c 5c80 	add.w	ip, ip, #268435456	; 0x10000000
-			prev_rom = 0;
- 80205b2:	2000      	movs	r0, #0
-			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
- 80205b4:	f88c 3c00 	strb.w	r3, [ip, #3072]	; 0xc00
-			        break;
- 80205b8:	46a4      	mov	ip, r4
- 80205ba:	e5b6      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80205bc:	882a      	ldrh	r2, [r5, #0]
- 80205be:	b292      	uxth	r2, r2
- 80205c0:	42a2      	cmp	r2, r4
- 80205c2:	d10d      	bne.n	80205e0 <emulate_ACEROM_cartridge+0x5b0>
- 80205c4:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80205c8:	465f      	mov	r7, fp
- 80205ca:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 80205ce:	4633      	mov	r3, r6
- 80205d0:	f89c 6000 	ldrb.w	r6, [ip]
- 80205d4:	882a      	ldrh	r2, [r5, #0]
- 80205d6:	b292      	uxth	r2, r2
- 80205d8:	42a2      	cmp	r2, r4
- 80205da:	b2f6      	uxtb	r6, r6
- 80205dc:	d0f7      	beq.n	80205ce <emulate_ACEROM_cartridge+0x59e>
- 80205de:	46bb      	mov	fp, r7
-			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
- 80205e0:	aa26      	add	r2, sp, #152	; 0x98
- 80205e2:	eb02 0e40 	add.w	lr, r2, r0, lsl #1
-			        break;
- 80205e6:	46a4      	mov	ip, r4
-			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
- 80205e8:	f83e 2c30 	ldrh.w	r2, [lr, #-48]
- 80205ec:	f102 5a80 	add.w	sl, r2, #268435456	; 0x10000000
-			        myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 80205f0:	3201      	adds	r2, #1
- 80205f2:	f3c2 020b 	ubfx	r2, r2, #0, #12
-			prev_rom = 0;
- 80205f6:	2000      	movs	r0, #0
-			        myDisplayImage[myCounters[index]] = (uint8_t)data_prev;
- 80205f8:	f88a 3c00 	strb.w	r3, [sl, #3072]	; 0xc00
-			        myCounters[index] = (myCounters[index] + 0x1) & 0x0fff;
- 80205fc:	f82e 2c30 	strh.w	r2, [lr, #-48]
-			        break;
- 8020600:	e593      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020602:	882a      	ldrh	r2, [r5, #0]
- 8020604:	b292      	uxth	r2, r2
- 8020606:	42a2      	cmp	r2, r4
- 8020608:	d10d      	bne.n	8020626 <emulate_ACEROM_cartridge+0x5f6>
- 802060a:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802060e:	465f      	mov	r7, fp
- 8020610:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 8020614:	4633      	mov	r3, r6
- 8020616:	f89c 6000 	ldrb.w	r6, [ip]
- 802061a:	882a      	ldrh	r2, [r5, #0]
- 802061c:	b292      	uxth	r2, r2
- 802061e:	42a2      	cmp	r2, r4
- 8020620:	b2f6      	uxtb	r6, r6
- 8020622:	d0f7      	beq.n	8020614 <emulate_ACEROM_cartridge+0x5e4>
- 8020624:	46bb      	mov	fp, r7
-			        myFractionalCounters[index] = (((uint32_t)(data_prev & 0x0F)) << 16) | (myFractionalCounters[index] & 0x00ffff);
- 8020626:	aa26      	add	r2, sp, #152	; 0x98
- 8020628:	eb02 0080 	add.w	r0, r2, r0, lsl #2
- 802062c:	041a      	lsls	r2, r3, #16
- 802062e:	f830 cc20 	ldrh.w	ip, [r0, #-32]
- 8020632:	f402 2270 	and.w	r2, r2, #983040	; 0xf0000
- 8020636:	ea42 020c 	orr.w	r2, r2, ip
- 802063a:	f840 2c20 	str.w	r2, [r0, #-32]
-			        break;
- 802063e:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 8020640:	2000      	movs	r0, #0
-			        break;
- 8020642:	e572      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
- 8020644:	2600      	movs	r6, #0
- 8020646:	e66a      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
- 8020648:	4a25      	ldr	r2, [pc, #148]	; (80206e0 <emulate_ACEROM_cartridge+0x6b0>)
- 802064a:	9203      	str	r2, [sp, #12]
- 802064c:	46a4      	mov	ip, r4
- 802064e:	2000      	movs	r0, #0
- 8020650:	e56b      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
+ 8020680:	4619      	mov	r1, r3
+ 8020682:	e566      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+ 8020684:	f3c3 000b 	ubfx	r0, r3, #0, #12
+ 8020688:	e7c9      	b.n	802061e <emulate_ACEROM_cartridge+0x5ee>
+ 802068a:	2400      	movs	r4, #0
+ 802068c:	e76d      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+   if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1; //Remove menu and start game
+ 802068e:	4648      	mov	r0, r9
+}
+ 8020690:	b023      	add	sp, #140	; 0x8c
+ 8020692:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+			    	addr = data; // dont't need to add 0x1000, because: if addr < 0x28 it is also < 0x1028 :-)
+ 8020696:	4621      	mov	r1, r4
+			if ( addr < 0x1028)
+ 8020698:	e729      	b.n	80204ee <emulate_ACEROM_cartridge+0x4be>
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020652:	882a      	ldrh	r2, [r5, #0]
- 8020654:	b292      	uxth	r2, r2
- 8020656:	42a2      	cmp	r2, r4
- 8020658:	d10b      	bne.n	8020672 <emulate_ACEROM_cartridge+0x642>
- 802065a:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802065e:	465f      	mov	r7, fp
- 8020660:	6a18      	ldr	r0, [r3, #32]
- 8020662:	4633      	mov	r3, r6
- 8020664:	7806      	ldrb	r6, [r0, #0]
- 8020666:	882a      	ldrh	r2, [r5, #0]
- 8020668:	b292      	uxth	r2, r2
- 802066a:	42a2      	cmp	r2, r4
- 802066c:	b2f6      	uxtb	r6, r6
- 802066e:	d0f8      	beq.n	8020662 <emulate_ACEROM_cartridge+0x632>
- 8020670:	46bb      	mov	fp, r7
-				        myMusicWaveforms[2] = (data_prev & 0x007f) << 5;
- 8020672:	015a      	lsls	r2, r3, #5
- 8020674:	f402 627e 	and.w	r2, r2, #4064	; 0xfe0
- 8020678:	920f      	str	r2, [sp, #60]	; 0x3c
-				        break;
- 802067a:	46a4      	mov	ip, r4
+ 802069a:	8801      	ldrh	r1, [r0, #0]
+ 802069c:	b289      	uxth	r1, r1
+ 802069e:	4299      	cmp	r1, r3
+ 80206a0:	d10c      	bne.n	80206bc <emulate_ACEROM_cartridge+0x68c>
+ 80206a2:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80206a6:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 80206aa:	4625      	mov	r5, r4
+ 80206ac:	f89e 4000 	ldrb.w	r4, [lr]
+ 80206b0:	8801      	ldrh	r1, [r0, #0]
+ 80206b2:	b289      	uxth	r1, r1
+ 80206b4:	4299      	cmp	r1, r3
+ 80206b6:	b2e4      	uxtb	r4, r4
+ 80206b8:	d0f7      	beq.n	80206aa <emulate_ACEROM_cartridge+0x67a>
+ 80206ba:	9500      	str	r5, [sp, #0]
+				        myMusicWaveforms[(index-5)] = (data_prev & 0x007f) << 5;
+ 80206bc:	a922      	add	r1, sp, #136	; 0x88
+ 80206be:	eb01 0c4c 	add.w	ip, r1, ip, lsl #1
+ 80206c2:	9900      	ldr	r1, [sp, #0]
+ 80206c4:	0149      	lsls	r1, r1, #5
+ 80206c6:	f401 617e 	and.w	r1, r1, #4064	; 0xfe0
+ 80206ca:	f82c 1c6e 	strh.w	r1, [ip, #-110]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80206ce:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
 			prev_rom = 0;
- 802067c:	2000      	movs	r0, #0
-				        break;
- 802067e:	e554      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020680:	882a      	ldrh	r2, [r5, #0]
- 8020682:	b292      	uxth	r2, r2
- 8020684:	42a2      	cmp	r2, r4
- 8020686:	d10b      	bne.n	80206a0 <emulate_ACEROM_cartridge+0x670>
- 8020688:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802068c:	465f      	mov	r7, fp
- 802068e:	6a18      	ldr	r0, [r3, #32]
- 8020690:	4633      	mov	r3, r6
- 8020692:	7806      	ldrb	r6, [r0, #0]
- 8020694:	882a      	ldrh	r2, [r5, #0]
- 8020696:	b292      	uxth	r2, r2
- 8020698:	42a2      	cmp	r2, r4
- 802069a:	b2f6      	uxtb	r6, r6
- 802069c:	d0f8      	beq.n	8020690 <emulate_ACEROM_cartridge+0x660>
- 802069e:	46bb      	mov	fp, r7
-				        myMusicWaveforms[1] = (data_prev & 0x007f) << 5;
- 80206a0:	015a      	lsls	r2, r3, #5
- 80206a2:	f402 627e 	and.w	r2, r2, #4064	; 0xfe0
- 80206a6:	920d      	str	r2, [sp, #52]	; 0x34
-				        break;
- 80206a8:	46a4      	mov	ip, r4
+ 80206d2:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80206d6:	69c8      	ldr	r0, [r1, #28]
 			prev_rom = 0;
- 80206aa:	2000      	movs	r0, #0
-				        break;
- 80206ac:	e53d      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80206ae:	882a      	ldrh	r2, [r5, #0]
- 80206b0:	b292      	uxth	r2, r2
- 80206b2:	42a2      	cmp	r2, r4
- 80206b4:	d10b      	bne.n	80206ce <emulate_ACEROM_cartridge+0x69e>
- 80206b6:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80206ba:	465f      	mov	r7, fp
- 80206bc:	6a18      	ldr	r0, [r3, #32]
- 80206be:	4633      	mov	r3, r6
- 80206c0:	7806      	ldrb	r6, [r0, #0]
- 80206c2:	882a      	ldrh	r2, [r5, #0]
- 80206c4:	b292      	uxth	r2, r2
- 80206c6:	42a2      	cmp	r2, r4
- 80206c8:	b2f6      	uxtb	r6, r6
- 80206ca:	d0f8      	beq.n	80206be <emulate_ACEROM_cartridge+0x68e>
- 80206cc:	46bb      	mov	fp, r7
-				        myMusicWaveforms[0] = (data_prev & 0x007f) << 5;
- 80206ce:	015a      	lsls	r2, r3, #5
- 80206d0:	f402 627e 	and.w	r2, r2, #4064	; 0xfe0
- 80206d4:	920e      	str	r2, [sp, #56]	; 0x38
-				        break;
- 80206d6:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 80206d8:	2000      	movs	r0, #0
-				        break;
- 80206da:	e526      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
+ 80206d8:	4619      	mov	r1, r3
+ 80206da:	e53a      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
  80206dc:	000fff00 	.word	0x000fff00
- 80206e0:	70435044 	.word	0x70435044
+ 80206e0:	40026400 	.word	0x40026400
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80206e4:	882a      	ldrh	r2, [r5, #0]
- 80206e6:	b292      	uxth	r2, r2
- 80206e8:	42a2      	cmp	r2, r4
- 80206ea:	d10b      	bne.n	8020704 <emulate_ACEROM_cartridge+0x6d4>
- 80206ec:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80206f0:	465f      	mov	r7, fp
- 80206f2:	6a18      	ldr	r0, [r3, #32]
- 80206f4:	4633      	mov	r3, r6
- 80206f6:	7806      	ldrb	r6, [r0, #0]
- 80206f8:	882a      	ldrh	r2, [r5, #0]
- 80206fa:	b292      	uxth	r2, r2
- 80206fc:	42a2      	cmp	r2, r4
- 80206fe:	b2f6      	uxtb	r6, r6
- 8020700:	d0f8      	beq.n	80206f4 <emulate_ACEROM_cartridge+0x6c4>
- 8020702:	46bb      	mov	fp, r7
-			        	  switch (data_prev)
- 8020704:	2b02      	cmp	r3, #2
- 8020706:	f000 8170 	beq.w	80209ea <emulate_ACEROM_cartridge+0x9ba>
- 802070a:	f200 8102 	bhi.w	8020912 <emulate_ACEROM_cartridge+0x8e2>
- 802070e:	2b00      	cmp	r3, #0
- 8020710:	f000 8183 	beq.w	8020a1a <emulate_ACEROM_cartridge+0x9ea>
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
- 8020714:	f89d 3062 	ldrb.w	r3, [sp, #98]	; 0x62
- 8020718:	aa26      	add	r2, sp, #152	; 0x98
- 802071a:	f003 0307 	and.w	r3, r3, #7
- 802071e:	eb02 0343 	add.w	r3, r2, r3, lsl #1
-			        	    	myDataFetcherCopyPointer = myParameter[3];
- 8020722:	f89d 2063 	ldrb.w	r2, [sp, #99]	; 0x63
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
- 8020726:	f833 3c30 	ldrh.w	r3, [r3, #-48]
- 802072a:	f103 5380 	add.w	r3, r3, #268435456	; 0x10000000
- 802072e:	f503 6340 	add.w	r3, r3, #3072	; 0xc00
- 8020732:	9307      	str	r3, [sp, #28]
-			        	    	source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];
- 8020734:	f8bd 3060 	ldrh.w	r3, [sp, #96]	; 0x60
- 8020738:	f103 5300 	add.w	r3, r3, #536870912	; 0x20000000
- 802073c:	f503 6340 	add.w	r3, r3, #3072	; 0xc00
- 8020740:	930c      	str	r3, [sp, #48]	; 0x30
-							  myParameterPointer = 0;
- 8020742:	2000      	movs	r0, #0
-			        	      break;
- 8020744:	2301      	movs	r3, #1
- 8020746:	9301      	str	r3, [sp, #4]
-							  myParameterPointer = 0;
- 8020748:	9009      	str	r0, [sp, #36]	; 0x24
-			        	    	myDataFetcherCopyPointer = myParameter[3];
- 802074a:	4693      	mov	fp, r2
-			        	      break;
- 802074c:	46a4      	mov	ip, r4
- 802074e:	e4ec      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
+ 80206e4:	8801      	ldrh	r1, [r0, #0]
+ 80206e6:	b289      	uxth	r1, r1
+ 80206e8:	428b      	cmp	r3, r1
+ 80206ea:	d10c      	bne.n	8020706 <emulate_ACEROM_cartridge+0x6d6>
+ 80206ec:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80206f0:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 80206f4:	4625      	mov	r5, r4
+ 80206f6:	f89e 4000 	ldrb.w	r4, [lr]
+ 80206fa:	8801      	ldrh	r1, [r0, #0]
+ 80206fc:	b289      	uxth	r1, r1
+ 80206fe:	4299      	cmp	r1, r3
+ 8020700:	b2e4      	uxtb	r4, r4
+ 8020702:	d0f7      	beq.n	80206f4 <emulate_ACEROM_cartridge+0x6c4>
+ 8020704:	9500      	str	r5, [sp, #0]
+				        myMusicFrequencies[(index-5)] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
+ 8020706:	a922      	add	r1, sp, #136	; 0x88
+ 8020708:	eb01 0c8c 	add.w	ip, r1, ip, lsl #2
+ 802070c:	9900      	ldr	r1, [sp, #0]
+ 802070e:	0089      	lsls	r1, r1, #2
+ 8020710:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 8020714:	f501 3188 	add.w	r1, r1, #69632	; 0x11000
+ 8020718:	f8d1 1c00 	ldr.w	r1, [r1, #3072]	; 0xc00
+ 802071c:	f84c 1c50 	str.w	r1, [ip, #-80]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020720:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 8020724:	f04f 0c00 	mov.w	ip, #0
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020728:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 802072a:	4619      	mov	r1, r3
+ 802072c:	e511      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
 			            if(myParameterPointer < 8){
- 8020750:	9a09      	ldr	r2, [sp, #36]	; 0x24
- 8020752:	2a07      	cmp	r2, #7
- 8020754:	f63f af7a 	bhi.w	802064c <emulate_ACEROM_cartridge+0x61c>
-			            	while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020758:	882a      	ldrh	r2, [r5, #0]
- 802075a:	b292      	uxth	r2, r2
- 802075c:	42a2      	cmp	r2, r4
- 802075e:	d10b      	bne.n	8020778 <emulate_ACEROM_cartridge+0x748>
- 8020760:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 8020764:	465f      	mov	r7, fp
- 8020766:	6a18      	ldr	r0, [r3, #32]
- 8020768:	4633      	mov	r3, r6
- 802076a:	7806      	ldrb	r6, [r0, #0]
- 802076c:	882a      	ldrh	r2, [r5, #0]
- 802076e:	b292      	uxth	r2, r2
- 8020770:	42a2      	cmp	r2, r4
- 8020772:	b2f6      	uxtb	r6, r6
- 8020774:	d0f8      	beq.n	8020768 <emulate_ACEROM_cartridge+0x738>
- 8020776:	46bb      	mov	fp, r7
-			            	myParameter[myParameterPointer++] = (uint8_t)data_prev;
- 8020778:	9809      	ldr	r0, [sp, #36]	; 0x24
- 802077a:	f100 0298 	add.w	r2, r0, #152	; 0x98
- 802077e:	446a      	add	r2, sp
- 8020780:	46a4      	mov	ip, r4
- 8020782:	f802 3c38 	strb.w	r3, [r2, #-56]
- 8020786:	1c42      	adds	r2, r0, #1
- 8020788:	b2d2      	uxtb	r2, r2
- 802078a:	9209      	str	r2, [sp, #36]	; 0x24
+ 802072e:	9905      	ldr	r1, [sp, #20]
+ 8020730:	2907      	cmp	r1, #7
+ 8020732:	f240 8106 	bls.w	8020942 <emulate_ACEROM_cartridge+0x912>
+ 8020736:	f04f 0c00 	mov.w	ip, #0
 			prev_rom = 0;
- 802078c:	2000      	movs	r0, #0
- 802078e:	e4cc      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
+ 802073a:	4619      	mov	r1, r3
+ 802073c:	e509      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020790:	882a      	ldrh	r2, [r5, #0]
- 8020792:	b292      	uxth	r2, r2
- 8020794:	42a2      	cmp	r2, r4
- 8020796:	d10b      	bne.n	80207b0 <emulate_ACEROM_cartridge+0x780>
- 8020798:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802079c:	465f      	mov	r7, fp
- 802079e:	6a19      	ldr	r1, [r3, #32]
- 80207a0:	4633      	mov	r3, r6
- 80207a2:	780e      	ldrb	r6, [r1, #0]
- 80207a4:	882a      	ldrh	r2, [r5, #0]
- 80207a6:	b292      	uxth	r2, r2
- 80207a8:	42a2      	cmp	r2, r4
- 80207aa:	b2f6      	uxtb	r6, r6
- 80207ac:	d0f8      	beq.n	80207a0 <emulate_ACEROM_cartridge+0x770>
- 80207ae:	46bb      	mov	fp, r7
+ 802073e:	8802      	ldrh	r2, [r0, #0]
+ 8020740:	b292      	uxth	r2, r2
+ 8020742:	429a      	cmp	r2, r3
+ 8020744:	f040 817f 	bne.w	8020a46 <emulate_ACEROM_cartridge+0xa16>
+ 8020748:	f04f 5200 	mov.w	r2, #536870912	; 0x20000000
+ 802074c:	6a11      	ldr	r1, [r2, #32]
+ 802074e:	4625      	mov	r5, r4
+ 8020750:	780c      	ldrb	r4, [r1, #0]
+ 8020752:	8802      	ldrh	r2, [r0, #0]
+ 8020754:	b292      	uxth	r2, r2
+ 8020756:	429a      	cmp	r2, r3
+ 8020758:	b2e4      	uxtb	r4, r4
+ 802075a:	d0f8      	beq.n	802074e <emulate_ACEROM_cartridge+0x71e>
+ 802075c:	9500      	str	r5, [sp, #0]
+ 802075e:	462a      	mov	r2, r5
 			            myFastFetch = ( data_prev == 0);
- 80207b0:	fab3 f183 	clz	r1, r3
- 80207b4:	0949      	lsrs	r1, r1, #5
-			            break;
- 80207b6:	46a4      	mov	ip, r4
- 80207b8:	e4b7      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
+ 8020760:	fab2 f282 	clz	r2, r2
+ 8020764:	0952      	lsrs	r2, r2, #5
+			prev_rom = 0;
+ 8020766:	4619      	mov	r1, r3
+ 8020768:	e4f3      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80207ba:	882a      	ldrh	r2, [r5, #0]
- 80207bc:	b292      	uxth	r2, r2
- 80207be:	4294      	cmp	r4, r2
- 80207c0:	d10b      	bne.n	80207da <emulate_ACEROM_cartridge+0x7aa>
- 80207c2:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80207c6:	465f      	mov	r7, fp
- 80207c8:	6a18      	ldr	r0, [r3, #32]
- 80207ca:	4633      	mov	r3, r6
- 80207cc:	7806      	ldrb	r6, [r0, #0]
- 80207ce:	882a      	ldrh	r2, [r5, #0]
- 80207d0:	b292      	uxth	r2, r2
- 80207d2:	42a2      	cmp	r2, r4
- 80207d4:	b2f6      	uxtb	r6, r6
- 80207d6:	d0f8      	beq.n	80207ca <emulate_ACEROM_cartridge+0x79a>
- 80207d8:	46bb      	mov	fp, r7
-				        myMusicFrequencies[2] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 80207da:	009a      	lsls	r2, r3, #2
- 80207dc:	f102 2210 	add.w	r2, r2, #268439552	; 0x10001000
-				        break;
- 80207e0:	46a4      	mov	ip, r4
-				        myMusicFrequencies[2] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 80207e2:	f8d2 2c00 	ldr.w	r2, [r2, #3072]	; 0xc00
- 80207e6:	920b      	str	r2, [sp, #44]	; 0x2c
-			prev_rom = 0;
- 80207e8:	2000      	movs	r0, #0
-				        break;
- 80207ea:	e49e      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80207ec:	882a      	ldrh	r2, [r5, #0]
- 80207ee:	b292      	uxth	r2, r2
- 80207f0:	4294      	cmp	r4, r2
- 80207f2:	d10b      	bne.n	802080c <emulate_ACEROM_cartridge+0x7dc>
- 80207f4:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80207f8:	465f      	mov	r7, fp
- 80207fa:	6a18      	ldr	r0, [r3, #32]
- 80207fc:	4633      	mov	r3, r6
- 80207fe:	7806      	ldrb	r6, [r0, #0]
- 8020800:	882a      	ldrh	r2, [r5, #0]
- 8020802:	b292      	uxth	r2, r2
- 8020804:	42a2      	cmp	r2, r4
- 8020806:	b2f6      	uxtb	r6, r6
- 8020808:	d0f8      	beq.n	80207fc <emulate_ACEROM_cartridge+0x7cc>
- 802080a:	46bb      	mov	fp, r7
-				        myMusicFrequencies[1] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 802080c:	009a      	lsls	r2, r3, #2
- 802080e:	f102 2210 	add.w	r2, r2, #268439552	; 0x10001000
-				        break;
- 8020812:	46a4      	mov	ip, r4
-				        myMusicFrequencies[1] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 8020814:	f8d2 2c00 	ldr.w	r2, [r2, #3072]	; 0xc00
- 8020818:	920a      	str	r2, [sp, #40]	; 0x28
-			prev_rom = 0;
- 802081a:	2000      	movs	r0, #0
-				        break;
- 802081c:	e485      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 802081e:	882a      	ldrh	r2, [r5, #0]
- 8020820:	b292      	uxth	r2, r2
- 8020822:	4294      	cmp	r4, r2
- 8020824:	d10b      	bne.n	802083e <emulate_ACEROM_cartridge+0x80e>
- 8020826:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802082a:	465f      	mov	r7, fp
- 802082c:	6a18      	ldr	r0, [r3, #32]
- 802082e:	4633      	mov	r3, r6
- 8020830:	7806      	ldrb	r6, [r0, #0]
- 8020832:	882a      	ldrh	r2, [r5, #0]
- 8020834:	b292      	uxth	r2, r2
- 8020836:	42a2      	cmp	r2, r4
- 8020838:	b2f6      	uxtb	r6, r6
- 802083a:	d0f8      	beq.n	802082e <emulate_ACEROM_cartridge+0x7fe>
- 802083c:	46bb      	mov	fp, r7
-			            myRandomNumber = (myRandomNumber & 0xFF00FFFF) | (((uint32_t)data_prev)<<16);
- 802083e:	9a03      	ldr	r2, [sp, #12]
- 8020840:	f422 027f 	bic.w	r2, r2, #16711680	; 0xff0000
- 8020844:	ea42 4203 	orr.w	r2, r2, r3, lsl #16
- 8020848:	9203      	str	r2, [sp, #12]
-			            break;
- 802084a:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 802084c:	2000      	movs	r0, #0
-			            break;
- 802084e:	e46c      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020850:	882a      	ldrh	r2, [r5, #0]
- 8020852:	b292      	uxth	r2, r2
- 8020854:	4294      	cmp	r4, r2
- 8020856:	d10b      	bne.n	8020870 <emulate_ACEROM_cartridge+0x840>
- 8020858:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802085c:	465f      	mov	r7, fp
- 802085e:	6a18      	ldr	r0, [r3, #32]
- 8020860:	4633      	mov	r3, r6
- 8020862:	7806      	ldrb	r6, [r0, #0]
- 8020864:	882a      	ldrh	r2, [r5, #0]
- 8020866:	b292      	uxth	r2, r2
- 8020868:	42a2      	cmp	r2, r4
- 802086a:	b2f6      	uxtb	r6, r6
- 802086c:	d0f8      	beq.n	8020860 <emulate_ACEROM_cartridge+0x830>
- 802086e:	46bb      	mov	fp, r7
-			            myRandomNumber = (myRandomNumber & 0xFFFF00FF) | (uint32_t)(data_prev<<8);
- 8020870:	9a03      	ldr	r2, [sp, #12]
- 8020872:	f422 427f 	bic.w	r2, r2, #65280	; 0xff00
- 8020876:	ea42 2203 	orr.w	r2, r2, r3, lsl #8
- 802087a:	9203      	str	r2, [sp, #12]
-			            break;
- 802087c:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 802087e:	2000      	movs	r0, #0
-			            break;
- 8020880:	e453      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020882:	882a      	ldrh	r2, [r5, #0]
- 8020884:	b292      	uxth	r2, r2
- 8020886:	4294      	cmp	r4, r2
- 8020888:	d10b      	bne.n	80208a2 <emulate_ACEROM_cartridge+0x872>
- 802088a:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 802088e:	465f      	mov	r7, fp
- 8020890:	6a18      	ldr	r0, [r3, #32]
- 8020892:	4633      	mov	r3, r6
- 8020894:	7806      	ldrb	r6, [r0, #0]
- 8020896:	882a      	ldrh	r2, [r5, #0]
- 8020898:	b292      	uxth	r2, r2
- 802089a:	42a2      	cmp	r2, r4
- 802089c:	b2f6      	uxtb	r6, r6
- 802089e:	d0f8      	beq.n	8020892 <emulate_ACEROM_cartridge+0x862>
- 80208a0:	46bb      	mov	fp, r7
-				        myMusicFrequencies[0] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 80208a2:	009a      	lsls	r2, r3, #2
- 80208a4:	f102 2210 	add.w	r2, r2, #268439552	; 0x10001000
-				        break;
- 80208a8:	46a4      	mov	ip, r4
-				        myMusicFrequencies[0] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
- 80208aa:	f8d2 2c00 	ldr.w	r2, [r2, #3072]	; 0xc00
- 80208ae:	9208      	str	r2, [sp, #32]
-			prev_rom = 0;
- 80208b0:	2000      	movs	r0, #0
-				        break;
- 80208b2:	e43a      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80208b4:	882a      	ldrh	r2, [r5, #0]
- 80208b6:	b292      	uxth	r2, r2
- 80208b8:	4294      	cmp	r4, r2
- 80208ba:	d10b      	bne.n	80208d4 <emulate_ACEROM_cartridge+0x8a4>
- 80208bc:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80208c0:	465f      	mov	r7, fp
- 80208c2:	6a18      	ldr	r0, [r3, #32]
- 80208c4:	4633      	mov	r3, r6
- 80208c6:	7806      	ldrb	r6, [r0, #0]
- 80208c8:	882a      	ldrh	r2, [r5, #0]
- 80208ca:	b292      	uxth	r2, r2
- 80208cc:	42a2      	cmp	r2, r4
- 80208ce:	b2f6      	uxtb	r6, r6
- 80208d0:	d0f8      	beq.n	80208c4 <emulate_ACEROM_cartridge+0x894>
- 80208d2:	46bb      	mov	fp, r7
-			            myRandomNumber = (myRandomNumber & 0x00FFFFFF) | (((uint32_t)data_prev)<<24);
- 80208d4:	9a03      	ldr	r2, [sp, #12]
- 80208d6:	f363 621f 	bfi	r2, r3, #24, #8
- 80208da:	9203      	str	r2, [sp, #12]
-			            break;
- 80208dc:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 80208de:	2000      	movs	r0, #0
-			            break;
- 80208e0:	e423      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 80208e2:	882a      	ldrh	r2, [r5, #0]
- 80208e4:	b292      	uxth	r2, r2
- 80208e6:	4294      	cmp	r4, r2
- 80208e8:	d10b      	bne.n	8020902 <emulate_ACEROM_cartridge+0x8d2>
- 80208ea:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 80208ee:	465f      	mov	r7, fp
- 80208f0:	6a18      	ldr	r0, [r3, #32]
- 80208f2:	4633      	mov	r3, r6
- 80208f4:	7806      	ldrb	r6, [r0, #0]
- 80208f6:	882a      	ldrh	r2, [r5, #0]
- 80208f8:	b292      	uxth	r2, r2
- 80208fa:	42a2      	cmp	r2, r4
- 80208fc:	b2f6      	uxtb	r6, r6
- 80208fe:	d0f8      	beq.n	80208f2 <emulate_ACEROM_cartridge+0x8c2>
- 8020900:	46bb      	mov	fp, r7
-			            myRandomNumber = (myRandomNumber & 0xFFFFFF00) | data_prev;
- 8020902:	9a03      	ldr	r2, [sp, #12]
- 8020904:	f022 02ff 	bic.w	r2, r2, #255	; 0xff
- 8020908:	431a      	orrs	r2, r3
- 802090a:	9203      	str	r2, [sp, #12]
-			            break;
- 802090c:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 802090e:	2000      	movs	r0, #0
-			            break;
- 8020910:	e40b      	b.n	802012a <emulate_ACEROM_cartridge+0xfa>
- 8020912:	1c9a      	adds	r2, r3, #2
- 8020914:	b2d2      	uxtb	r2, r2
- 8020916:	2a01      	cmp	r2, #1
- 8020918:	f63f ae98 	bhi.w	802064c <emulate_ACEROM_cartridge+0x61c>
- 802091c:	4622      	mov	r2, r4
- 802091e:	465f      	mov	r7, fp
-			        	    	while ((addr = ADDR_IN) != addr_prev) addr_prev = addr;
- 8020920:	4693      	mov	fp, r2
- 8020922:	882a      	ldrh	r2, [r5, #0]
- 8020924:	b292      	uxth	r2, r2
- 8020926:	4593      	cmp	fp, r2
- 8020928:	d1fa      	bne.n	8020920 <emulate_ACEROM_cartridge+0x8f0>
-				        	    DATA_OUT = 0xEA;				// (NOP)
- 802092a:	f04f 5a00 	mov.w	sl, #536870912	; 0x20000000
- 802092e:	20ea      	movs	r0, #234	; 0xea
- 8020930:	f8da 2024 	ldr.w	r2, [sl, #36]	; 0x24
- 8020934:	7010      	strb	r0, [r2, #0]
-				        	    SET_DATA_MODE_OUT;
- 8020936:	f8da 2028 	ldr.w	r2, [sl, #40]	; 0x28
- 802093a:	f245 5055 	movw	r0, #21845	; 0x5555
-				        	    DATA_OUT = 0xEA;				// (NOP)
- 802093e:	e9cd 1310 	strd	r1, r3, [sp, #64]	; 0x40
-				        	    SET_DATA_MODE_OUT;
- 8020942:	8010      	strh	r0, [r2, #0]
-			        	    	((int (*)())thumb_code_entry_point)();
- 8020944:	4a6f      	ldr	r2, [pc, #444]	; (8020b04 <emulate_ACEROM_cartridge+0xad4>)
- 8020946:	4790      	blx	r2
-			        	    	addr = ADDR_IN;
- 8020948:	f8da c01c 	ldr.w	ip, [sl, #28]
- 802094c:	e9dd 1310 	ldrd	r1, r3, [sp, #64]	; 0x40
- 8020950:	f8bc 2000 	ldrh.w	r2, [ip]
- 8020954:	b292      	uxth	r2, r2
-				        	    while (ADDR_IN == addr);
- 8020956:	f8bc 0000 	ldrh.w	r0, [ip]
- 802095a:	b280      	uxth	r0, r0
- 802095c:	4290      	cmp	r0, r2
- 802095e:	d0fa      	beq.n	8020956 <emulate_ACEROM_cartridge+0x926>
-								DELAY_tADS;
- 8020960:	bf00      	nop
- 8020962:	bf00      	nop
-			        	    	addr = ADDR_IN;
- 8020964:	f04f 5000 	mov.w	r0, #536870912	; 0x20000000
-				        	    DATA_OUT = 0x4C;				// (JMP)
- 8020968:	f04f 0c4c 	mov.w	ip, #76	; 0x4c
-			        	    	addr = ADDR_IN;
- 802096c:	69c2      	ldr	r2, [r0, #28]
- 802096e:	f8b2 e000 	ldrh.w	lr, [r2]
-				        	    DATA_OUT = 0x4C;				// (JMP)
- 8020972:	6a42      	ldr	r2, [r0, #36]	; 0x24
- 8020974:	f882 c000 	strb.w	ip, [r2]
-				        	    while (ADDR_IN == addr);								
- 8020978:	69c0      	ldr	r0, [r0, #28]
-			        	    	addr = ADDR_IN;
- 802097a:	fa1f fe8e 	uxth.w	lr, lr
-				        	    while (ADDR_IN == addr);								
- 802097e:	8802      	ldrh	r2, [r0, #0]
- 8020980:	b292      	uxth	r2, r2
- 8020982:	4572      	cmp	r2, lr
- 8020984:	d0fb      	beq.n	802097e <emulate_ACEROM_cartridge+0x94e>
-								DELAY_tADS;
- 8020986:	bf00      	nop
- 8020988:	bf00      	nop
-			        	    	addr = ADDR_IN;
- 802098a:	f04f 5000 	mov.w	r0, #536870912	; 0x20000000
-				        	    DATA_OUT = (uint8_t)(addr_prev & 0xff);	// (Low Byte of new addr)
- 802098e:	fa5f fc8b 	uxtb.w	ip, fp
-			        	    	addr = ADDR_IN;
- 8020992:	69c2      	ldr	r2, [r0, #28]
- 8020994:	f8b2 e000 	ldrh.w	lr, [r2]
-				        	    DATA_OUT = (uint8_t)(addr_prev & 0xff);	// (Low Byte of new addr)
- 8020998:	6a42      	ldr	r2, [r0, #36]	; 0x24
- 802099a:	f882 c000 	strb.w	ip, [r2]
-				        	    while (ADDR_IN == addr);
- 802099e:	69c0      	ldr	r0, [r0, #28]
-			        	    	addr = ADDR_IN;
- 80209a0:	fa1f fe8e 	uxth.w	lr, lr
-				        	    while (ADDR_IN == addr);
- 80209a4:	8802      	ldrh	r2, [r0, #0]
- 80209a6:	b292      	uxth	r2, r2
- 80209a8:	4572      	cmp	r2, lr
- 80209aa:	d0fb      	beq.n	80209a4 <emulate_ACEROM_cartridge+0x974>
-								DELAY_tADS;
- 80209ac:	bf00      	nop
- 80209ae:	bf00      	nop
-			        	    	addr = ADDR_IN;
- 80209b0:	f04f 5c00 	mov.w	ip, #536870912	; 0x20000000
-				        	    DATA_OUT = (uint8_t)(addr_prev >> 8);	// (High Byte of new addr)
- 80209b4:	f3cb 2007 	ubfx	r0, fp, #8, #8
-			        	    	addr = ADDR_IN;
- 80209b8:	f8dc 201c 	ldr.w	r2, [ip, #28]
- 80209bc:	f8b2 e000 	ldrh.w	lr, [r2]
-				        	    DATA_OUT = (uint8_t)(addr_prev >> 8);	// (High Byte of new addr)
- 80209c0:	f8dc 2024 	ldr.w	r2, [ip, #36]	; 0x24
- 80209c4:	7010      	strb	r0, [r2, #0]
-				        	    while (ADDR_IN == addr);
- 80209c6:	f8dc 001c 	ldr.w	r0, [ip, #28]
-			        	    	addr = ADDR_IN;
- 80209ca:	fa1f fe8e 	uxth.w	lr, lr
-				        	    while (ADDR_IN == addr);
- 80209ce:	8802      	ldrh	r2, [r0, #0]
- 80209d0:	b292      	uxth	r2, r2
- 80209d2:	4572      	cmp	r2, lr
- 80209d4:	d0fb      	beq.n	80209ce <emulate_ACEROM_cartridge+0x99e>
-				        	    SET_DATA_MODE_IN;
- 80209d6:	f04f 5200 	mov.w	r2, #536870912	; 0x20000000
- 80209da:	2000      	movs	r0, #0
- 80209dc:	6a92      	ldr	r2, [r2, #40]	; 0x28
-				        	  break;
- 80209de:	46a4      	mov	ip, r4
- 80209e0:	46bb      	mov	fp, r7
- 80209e2:	4674      	mov	r4, lr
-				        	    SET_DATA_MODE_IN;
- 80209e4:	8010      	strh	r0, [r2, #0]
-				        	  break;
- 80209e6:	f7ff bba0 	b.w	802012a <emulate_ACEROM_cartridge+0xfa>
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2]]];
- 80209ea:	f89d 2062 	ldrb.w	r2, [sp, #98]	; 0x62
-			        	    	myDataFetcherCopyValue =  myParameter[0];
- 80209ee:	f89d 9060 	ldrb.w	r9, [sp, #96]	; 0x60
-			        	    	break;
- 80209f2:	9301      	str	r3, [sp, #4]
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2]]];
- 80209f4:	a826      	add	r0, sp, #152	; 0x98
- 80209f6:	eb00 0242 	add.w	r2, r0, r2, lsl #1
-			        	    	myDataFetcherCopyPointer = myParameter[3];
- 80209fa:	f89d 0063 	ldrb.w	r0, [sp, #99]	; 0x63
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2]]];
- 80209fe:	f832 2c30 	ldrh.w	r2, [r2, #-48]
- 8020a02:	f102 5280 	add.w	r2, r2, #268435456	; 0x10000000
- 8020a06:	f502 6240 	add.w	r2, r2, #3072	; 0xc00
- 8020a0a:	9207      	str	r2, [sp, #28]
-			        	    	myParameterPointer = 0;
- 8020a0c:	2200      	movs	r2, #0
-			        	    	myDataFetcherCopyPointer = myParameter[3];
- 8020a0e:	4683      	mov	fp, r0
-			        	    	myParameterPointer = 0;
- 8020a10:	9209      	str	r2, [sp, #36]	; 0x24
-			        	    	break;
- 8020a12:	46a4      	mov	ip, r4
-			prev_rom = 0;
- 8020a14:	4610      	mov	r0, r2
-			        	    	break;
- 8020a16:	f7ff bb88 	b.w	802012a <emulate_ACEROM_cartridge+0xfa>
+ 802076a:	8801      	ldrh	r1, [r0, #0]
+ 802076c:	b289      	uxth	r1, r1
+ 802076e:	4299      	cmp	r1, r3
+ 8020770:	f040 8167 	bne.w	8020a42 <emulate_ACEROM_cartridge+0xa12>
+ 8020774:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020778:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 802077c:	4625      	mov	r5, r4
+ 802077e:	f89c 4000 	ldrb.w	r4, [ip]
+ 8020782:	8801      	ldrh	r1, [r0, #0]
+ 8020784:	b289      	uxth	r1, r1
+ 8020786:	4299      	cmp	r1, r3
+ 8020788:	b2e4      	uxtb	r4, r4
+ 802078a:	d0f7      	beq.n	802077c <emulate_ACEROM_cartridge+0x74c>
+ 802078c:	9500      	str	r5, [sp, #0]
+ 802078e:	4629      	mov	r1, r5
+			        	  switch (data_prev)
+ 8020790:	2902      	cmp	r1, #2
+ 8020792:	d877      	bhi.n	8020884 <emulate_ACEROM_cartridge+0x854>
+ 8020794:	2900      	cmp	r1, #0
+ 8020796:	f040 80f7 	bne.w	8020988 <emulate_ACEROM_cartridge+0x958>
 			        	      myParameterPointer = 0;
- 8020a1a:	9309      	str	r3, [sp, #36]	; 0x24
- 8020a1c:	46a4      	mov	ip, r4
+ 802079a:	9105      	str	r1, [sp, #20]
 			prev_rom = 0;
- 8020a1e:	4618      	mov	r0, r3
- 8020a20:	f7ff bb83 	b.w	802012a <emulate_ACEROM_cartridge+0xfa>
-						switch(index)
- 8020a24:	f1bc 0f05 	cmp.w	ip, #5
- 8020a28:	f63f ae0c 	bhi.w	8020644 <emulate_ACEROM_cartridge+0x614>
- 8020a2c:	e8df f00c 	tbb	[pc, ip]
- 8020a30:	43654751 	.word	0x43654751
- 8020a34:	2440      	.short	0x2440
+ 802079c:	468c      	mov	ip, r1
+ 802079e:	4619      	mov	r1, r3
+ 80207a0:	e4d7      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80207a2:	8801      	ldrh	r1, [r0, #0]
+ 80207a4:	b289      	uxth	r1, r1
+ 80207a6:	428b      	cmp	r3, r1
+ 80207a8:	f040 8128 	bne.w	80209fc <emulate_ACEROM_cartridge+0x9cc>
+ 80207ac:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80207b0:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 80207b4:	4625      	mov	r5, r4
+ 80207b6:	f89c 4000 	ldrb.w	r4, [ip]
+ 80207ba:	8801      	ldrh	r1, [r0, #0]
+ 80207bc:	b289      	uxth	r1, r1
+ 80207be:	4299      	cmp	r1, r3
+ 80207c0:	b2e4      	uxtb	r4, r4
+ 80207c2:	d0f7      	beq.n	80207b4 <emulate_ACEROM_cartridge+0x784>
+ 80207c4:	9500      	str	r5, [sp, #0]
+			            myRandomNumber = (myRandomNumber & 0xFFFF00FF) | (uint32_t)(data_prev<<8);
+ 80207c6:	9903      	ldr	r1, [sp, #12]
+ 80207c8:	f421 417f 	bic.w	r1, r1, #65280	; 0xff00
+ 80207cc:	ea41 2105 	orr.w	r1, r1, r5, lsl #8
+ 80207d0:	9103      	str	r1, [sp, #12]
+			prev_rom = 0;
+ 80207d2:	f04f 0c00 	mov.w	ip, #0
+ 80207d6:	4619      	mov	r1, r3
+ 80207d8:	e4bb      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 80207da:	8801      	ldrh	r1, [r0, #0]
+ 80207dc:	b289      	uxth	r1, r1
+ 80207de:	428b      	cmp	r3, r1
+ 80207e0:	f040 812b 	bne.w	8020a3a <emulate_ACEROM_cartridge+0xa0a>
+ 80207e4:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 80207e8:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 80207ec:	4625      	mov	r5, r4
+ 80207ee:	f89c 4000 	ldrb.w	r4, [ip]
+ 80207f2:	8801      	ldrh	r1, [r0, #0]
+ 80207f4:	b289      	uxth	r1, r1
+ 80207f6:	4299      	cmp	r1, r3
+ 80207f8:	b2e4      	uxtb	r4, r4
+ 80207fa:	d0f7      	beq.n	80207ec <emulate_ACEROM_cartridge+0x7bc>
+ 80207fc:	9500      	str	r5, [sp, #0]
+			            myRandomNumber = (myRandomNumber & 0x00FFFFFF) | (((uint32_t)data_prev)<<24);
+ 80207fe:	9903      	ldr	r1, [sp, #12]
+ 8020800:	f365 611f 	bfi	r1, r5, #24, #8
+ 8020804:	9103      	str	r1, [sp, #12]
+			prev_rom = 0;
+ 8020806:	f04f 0c00 	mov.w	ip, #0
+ 802080a:	4619      	mov	r1, r3
+ 802080c:	e4a1      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 802080e:	8801      	ldrh	r1, [r0, #0]
+ 8020810:	b289      	uxth	r1, r1
+ 8020812:	4299      	cmp	r1, r3
+ 8020814:	f040 810f 	bne.w	8020a36 <emulate_ACEROM_cartridge+0xa06>
+ 8020818:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802081c:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 8020820:	4625      	mov	r5, r4
+ 8020822:	f89c 4000 	ldrb.w	r4, [ip]
+ 8020826:	8801      	ldrh	r1, [r0, #0]
+ 8020828:	b289      	uxth	r1, r1
+ 802082a:	4299      	cmp	r1, r3
+ 802082c:	b2e4      	uxtb	r4, r4
+ 802082e:	d0f7      	beq.n	8020820 <emulate_ACEROM_cartridge+0x7f0>
+ 8020830:	9500      	str	r5, [sp, #0]
+			            myRandomNumber = (myRandomNumber & 0xFFFFFF00) | data_prev;
+ 8020832:	9903      	ldr	r1, [sp, #12]
+ 8020834:	f021 01ff 	bic.w	r1, r1, #255	; 0xff
+ 8020838:	4329      	orrs	r1, r5
+ 802083a:	9103      	str	r1, [sp, #12]
+			prev_rom = 0;
+ 802083c:	f04f 0c00 	mov.w	ip, #0
+ 8020840:	4619      	mov	r1, r3
+ 8020842:	e486      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020844:	8801      	ldrh	r1, [r0, #0]
+ 8020846:	b289      	uxth	r1, r1
+ 8020848:	428b      	cmp	r3, r1
+ 802084a:	f040 80f8 	bne.w	8020a3e <emulate_ACEROM_cartridge+0xa0e>
+ 802084e:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020852:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 8020856:	4625      	mov	r5, r4
+ 8020858:	f89c 4000 	ldrb.w	r4, [ip]
+ 802085c:	8801      	ldrh	r1, [r0, #0]
+ 802085e:	b289      	uxth	r1, r1
+ 8020860:	4299      	cmp	r1, r3
+ 8020862:	b2e4      	uxtb	r4, r4
+ 8020864:	d0f7      	beq.n	8020856 <emulate_ACEROM_cartridge+0x826>
+ 8020866:	9500      	str	r5, [sp, #0]
+			            myRandomNumber = (myRandomNumber & 0xFF00FFFF) | (((uint32_t)data_prev)<<16);
+ 8020868:	9903      	ldr	r1, [sp, #12]
+ 802086a:	f421 017f 	bic.w	r1, r1, #16711680	; 0xff0000
+ 802086e:	ea41 4105 	orr.w	r1, r1, r5, lsl #16
+ 8020872:	9103      	str	r1, [sp, #12]
+			prev_rom = 0;
+ 8020874:	f04f 0c00 	mov.w	ip, #0
+ 8020878:	4619      	mov	r1, r3
+ 802087a:	e46a      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+ 802087c:	9d00      	ldr	r5, [sp, #0]
+ 802087e:	e569      	b.n	8020354 <emulate_ACEROM_cartridge+0x324>
+ 8020880:	9d00      	ldr	r5, [sp, #0]
+ 8020882:	e4c1      	b.n	8020208 <emulate_ACEROM_cartridge+0x1d8>
+ 8020884:	3102      	adds	r1, #2
+ 8020886:	b2c9      	uxtb	r1, r1
+ 8020888:	2901      	cmp	r1, #1
+ 802088a:	f63f af54 	bhi.w	8020736 <emulate_ACEROM_cartridge+0x706>
+ 802088e:	9d00      	ldr	r5, [sp, #0]
+			        	    	while ((addr = ADDR_IN) != addr_prev) addr_prev = addr;
+ 8020890:	4619      	mov	r1, r3
+ 8020892:	8803      	ldrh	r3, [r0, #0]
+ 8020894:	b29b      	uxth	r3, r3
+ 8020896:	4299      	cmp	r1, r3
+ 8020898:	d1fa      	bne.n	8020890 <emulate_ACEROM_cartridge+0x860>
+				        	    DATA_OUT = 0xEA;				// (NOP)
+ 802089a:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
+ 802089e:	9100      	str	r1, [sp, #0]
+ 80208a0:	6a58      	ldr	r0, [r3, #36]	; 0x24
+ 80208a2:	9207      	str	r2, [sp, #28]
+ 80208a4:	21ea      	movs	r1, #234	; 0xea
+ 80208a6:	7001      	strb	r1, [r0, #0]
+				        	    SET_DATA_MODE_OUT;
+ 80208a8:	6a98      	ldr	r0, [r3, #40]	; 0x28
+ 80208aa:	f245 5155 	movw	r1, #21845	; 0x5555
+ 80208ae:	8001      	strh	r1, [r0, #0]
+			        	    	((int (*)())thumb_code_entry_point)();
+ 80208b0:	49a2      	ldr	r1, [pc, #648]	; (8020b3c <emulate_ACEROM_cartridge+0xb0c>)
+ 80208b2:	4788      	blx	r1
+			        	    	addr = ADDR_IN;
+ 80208b4:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
+ 80208b8:	9a07      	ldr	r2, [sp, #28]
+ 80208ba:	69d8      	ldr	r0, [r3, #28]
+ 80208bc:	8801      	ldrh	r1, [r0, #0]
+ 80208be:	b289      	uxth	r1, r1
+				        	    while (ADDR_IN == addr);
+ 80208c0:	8803      	ldrh	r3, [r0, #0]
+ 80208c2:	b29b      	uxth	r3, r3
+ 80208c4:	428b      	cmp	r3, r1
+ 80208c6:	d0fb      	beq.n	80208c0 <emulate_ACEROM_cartridge+0x890>
+								DELAY_tADS;
+ 80208c8:	bf00      	nop
+			        	    	addr = ADDR_IN;
+ 80208ca:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+				        	    DATA_OUT = 0x4C;				// (JMP)
+ 80208ce:	204c      	movs	r0, #76	; 0x4c
+			        	    	addr = ADDR_IN;
+ 80208d0:	69cb      	ldr	r3, [r1, #28]
+ 80208d2:	f8b3 c000 	ldrh.w	ip, [r3]
+				        	    DATA_OUT = 0x4C;				// (JMP)
+ 80208d6:	6a4b      	ldr	r3, [r1, #36]	; 0x24
+ 80208d8:	7018      	strb	r0, [r3, #0]
+				        	    while (ADDR_IN == addr);								
+ 80208da:	69c9      	ldr	r1, [r1, #28]
+			        	    	addr = ADDR_IN;
+ 80208dc:	fa1f fc8c 	uxth.w	ip, ip
+				        	    while (ADDR_IN == addr);								
+ 80208e0:	880b      	ldrh	r3, [r1, #0]
+ 80208e2:	b29b      	uxth	r3, r3
+ 80208e4:	4563      	cmp	r3, ip
+ 80208e6:	d0fb      	beq.n	80208e0 <emulate_ACEROM_cartridge+0x8b0>
+								DELAY_tADS;
+ 80208e8:	bf00      	nop
+			        	    	addr = ADDR_IN;
+ 80208ea:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+				        	    DATA_OUT = (uint8_t)(addr_prev & 0xff);	// (Low Byte of new addr)
+ 80208ee:	f89d 0000 	ldrb.w	r0, [sp]
+			        	    	addr = ADDR_IN;
+ 80208f2:	69cb      	ldr	r3, [r1, #28]
+ 80208f4:	f8b3 c000 	ldrh.w	ip, [r3]
+				        	    DATA_OUT = (uint8_t)(addr_prev & 0xff);	// (Low Byte of new addr)
+ 80208f8:	6a4b      	ldr	r3, [r1, #36]	; 0x24
+ 80208fa:	7018      	strb	r0, [r3, #0]
+				        	    while (ADDR_IN == addr);
+ 80208fc:	69c9      	ldr	r1, [r1, #28]
+			        	    	addr = ADDR_IN;
+ 80208fe:	fa1f fc8c 	uxth.w	ip, ip
+				        	    while (ADDR_IN == addr);
+ 8020902:	880b      	ldrh	r3, [r1, #0]
+ 8020904:	b29b      	uxth	r3, r3
+ 8020906:	4563      	cmp	r3, ip
+ 8020908:	d0fb      	beq.n	8020902 <emulate_ACEROM_cartridge+0x8d2>
+								DELAY_tADS;
+ 802090a:	bf00      	nop
+			        	    	addr = ADDR_IN;
+ 802090c:	f04f 5c00 	mov.w	ip, #536870912	; 0x20000000
+				        	    DATA_OUT = (uint8_t)(addr_prev >> 8);	// (High Byte of new addr)
+ 8020910:	9b00      	ldr	r3, [sp, #0]
+ 8020912:	f8dc 1024 	ldr.w	r1, [ip, #36]	; 0x24
+ 8020916:	0a18      	lsrs	r0, r3, #8
+			        	    	addr = ADDR_IN;
+ 8020918:	f8dc 301c 	ldr.w	r3, [ip, #28]
+ 802091c:	881b      	ldrh	r3, [r3, #0]
+				        	    DATA_OUT = (uint8_t)(addr_prev >> 8);	// (High Byte of new addr)
+ 802091e:	7008      	strb	r0, [r1, #0]
+				        	    while (ADDR_IN == addr);
+ 8020920:	f8dc 001c 	ldr.w	r0, [ip, #28]
+			        	    	addr = ADDR_IN;
+ 8020924:	b29b      	uxth	r3, r3
+				        	    while (ADDR_IN == addr);
+ 8020926:	8801      	ldrh	r1, [r0, #0]
+ 8020928:	b289      	uxth	r1, r1
+ 802092a:	4299      	cmp	r1, r3
+ 802092c:	d0fb      	beq.n	8020926 <emulate_ACEROM_cartridge+0x8f6>
+				        	    SET_DATA_MODE_IN;
+ 802092e:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020932:	f04f 0c00 	mov.w	ip, #0
+ 8020936:	6a89      	ldr	r1, [r1, #40]	; 0x28
+ 8020938:	9500      	str	r5, [sp, #0]
+ 802093a:	f8a1 c000 	strh.w	ip, [r1]
+			prev_rom = 0;
+ 802093e:	4619      	mov	r1, r3
+ 8020940:	e407      	b.n	8020152 <emulate_ACEROM_cartridge+0x122>
+			            	while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+ 8020942:	8801      	ldrh	r1, [r0, #0]
+ 8020944:	b289      	uxth	r1, r1
+ 8020946:	428b      	cmp	r3, r1
+ 8020948:	d10c      	bne.n	8020964 <emulate_ACEROM_cartridge+0x934>
+ 802094a:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 802094e:	f8d1 c020 	ldr.w	ip, [r1, #32]
+ 8020952:	4625      	mov	r5, r4
+ 8020954:	f89c 4000 	ldrb.w	r4, [ip]
+ 8020958:	8801      	ldrh	r1, [r0, #0]
+ 802095a:	b289      	uxth	r1, r1
+ 802095c:	4299      	cmp	r1, r3
+ 802095e:	b2e4      	uxtb	r4, r4
+ 8020960:	d0f7      	beq.n	8020952 <emulate_ACEROM_cartridge+0x922>
+ 8020962:	9500      	str	r5, [sp, #0]
+			            	myParameter[myParameterPointer++] = (uint8_t)data_prev;
+ 8020964:	9805      	ldr	r0, [sp, #20]
+ 8020966:	9d00      	ldr	r5, [sp, #0]
+ 8020968:	f100 0188 	add.w	r1, r0, #136	; 0x88
+ 802096c:	4469      	add	r1, sp
+			prev_rom = 0;
+ 802096e:	f04f 0c00 	mov.w	ip, #0
+			            	myParameter[myParameterPointer++] = (uint8_t)data_prev;
+ 8020972:	f801 5c44 	strb.w	r5, [r1, #-68]
+ 8020976:	1c41      	adds	r1, r0, #1
+ 8020978:	b2c9      	uxtb	r1, r1
+ 802097a:	9105      	str	r1, [sp, #20]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 802097c:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020980:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 8020982:	4619      	mov	r1, r3
+ 8020984:	f7ff bbe5 	b.w	8020152 <emulate_ACEROM_cartridge+0x122>
+								if (data_prev==1) {
+ 8020988:	2901      	cmp	r1, #1
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+ 802098a:	f89d 1046 	ldrb.w	r1, [sp, #70]	; 0x46
+								if (data_prev==1) {
+ 802098e:	d03d      	beq.n	8020a0c <emulate_ACEROM_cartridge+0x9dc>
+									destination = &myDisplayImage[myCounters[myParameter[2]]]; //Set desintation as per parameters
+ 8020990:	ad22      	add	r5, sp, #136	; 0x88
+ 8020992:	eb05 0141 	add.w	r1, r5, r1, lsl #1
+									source = &myParameter[0]; //Set source to be static copy value.
+ 8020996:	f8dd e010 	ldr.w	lr, [sp, #16]
+									destination = &myDisplayImage[myCounters[myParameter[2]]]; //Set desintation as per parameters
+ 802099a:	f831 1c30 	ldrh.w	r1, [r1, #-48]
+						  uint32_t Source_Pointer_Mode=0;
+ 802099e:	2500      	movs	r5, #0
+									destination = &myDisplayImage[myCounters[myParameter[2]]]; //Set desintation as per parameters
+ 80209a0:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 80209a4:	f501 3186 	add.w	r1, r1, #68608	; 0x10c00
+						  uint32_t Source_Pointer_Mode=0;
+ 80209a8:	9507      	str	r5, [sp, #28]
+								if ((DMA2_Stream0->CR&DMA_SxCR_EN)==0) { //Only proceed if DMA Transfer is complete
+ 80209aa:	f8df c1a0 	ldr.w	ip, [pc, #416]	; 8020b4c <emulate_ACEROM_cartridge+0xb1c>
+ 80209ae:	f8dc 5010 	ldr.w	r5, [ip, #16]
+ 80209b2:	f015 0501 	ands.w	r5, r5, #1
+ 80209b6:	d123      	bne.n	8020a00 <emulate_ACEROM_cartridge+0x9d0>
+									DMA2->LIFCR= 0x0000003D; //Clear all the interrupt status bits
+ 80209b8:	203d      	movs	r0, #61	; 0x3d
+							  myParameterPointer = 0;
+ 80209ba:	9505      	str	r5, [sp, #20]
+									DMA2->LIFCR= 0x0000003D; //Clear all the interrupt status bits
+ 80209bc:	f8cc 0008 	str.w	r0, [ip, #8]
+									DMA2_Stream0->CR |= (0b10 << DMA_SxCR_DIR_Pos) // Memory-to-memory Mode
+ 80209c0:	f8dc 0010 	ldr.w	r0, [ip, #16]
+ 80209c4:	9d07      	ldr	r5, [sp, #28]
+ 80209c6:	4328      	orrs	r0, r5
+ 80209c8:	f440 6090 	orr.w	r0, r0, #1152	; 0x480
+ 80209cc:	f8cc 0010 	str.w	r0, [ip, #16]
+									DMA2_Stream0->PAR = (uint32_t) (source); //Set DMA source pointer
+ 80209d0:	f8cc e018 	str.w	lr, [ip, #24]
+									DMA2_Stream0->M0AR = (uint32_t) (destination); //Set DMA destination pointer
+ 80209d4:	f8cc 101c 	str.w	r1, [ip, #28]
+									DMA2_Stream0->NDTR = (uint16_t) (myParameter[3]); //Set length of DMA transfer in bytes
+ 80209d8:	f89d 1047 	ldrb.w	r1, [sp, #71]	; 0x47
+ 80209dc:	f8cc 1014 	str.w	r1, [ip, #20]
+									DMA2_Stream0->CR |= DMA_SxCR_EN; // Start DMA transfer
+ 80209e0:	f8dc 1010 	ldr.w	r1, [ip, #16]
+ 80209e4:	f041 0101 	orr.w	r1, r1, #1
+ 80209e8:	f8cc 1010 	str.w	r1, [ip, #16]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80209ec:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+			prev_rom = 0;
+ 80209f0:	f8dd c014 	ldr.w	ip, [sp, #20]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 80209f4:	69c8      	ldr	r0, [r1, #28]
+			prev_rom = 0;
+ 80209f6:	4619      	mov	r1, r3
+ 80209f8:	f7ff bbab 	b.w	8020152 <emulate_ACEROM_cartridge+0x122>
+ 80209fc:	9d00      	ldr	r5, [sp, #0]
+ 80209fe:	e6e2      	b.n	80207c6 <emulate_ACEROM_cartridge+0x796>
+							  myParameterPointer = 0;
+ 8020a00:	2100      	movs	r1, #0
+ 8020a02:	9105      	str	r1, [sp, #20]
+			prev_rom = 0;
+ 8020a04:	468c      	mov	ip, r1
+ 8020a06:	4619      	mov	r1, r3
+ 8020a08:	f7ff bba3 	b.w	8020152 <emulate_ACEROM_cartridge+0x122>
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+ 8020a0c:	ad22      	add	r5, sp, #136	; 0x88
+ 8020a0e:	f001 0107 	and.w	r1, r1, #7
+ 8020a12:	eb05 0141 	add.w	r1, r5, r1, lsl #1
+									source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];  //Set ROM source as per parameters
+ 8020a16:	f8bd e044 	ldrh.w	lr, [sp, #68]	; 0x44
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+ 8020a1a:	f831 1c30 	ldrh.w	r1, [r1, #-48]
+									source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];  //Set ROM source as per parameters
+ 8020a1e:	f10e 5e00 	add.w	lr, lr, #536870912	; 0x20000000
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+ 8020a22:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+									Source_Pointer_Mode=1<<9;
+ 8020a26:	f44f 7500 	mov.w	r5, #512	; 0x200
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+ 8020a2a:	f501 3186 	add.w	r1, r1, #68608	; 0x10c00
+									source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];  //Set ROM source as per parameters
+ 8020a2e:	f50e 6e40 	add.w	lr, lr, #3072	; 0xc00
+									Source_Pointer_Mode=1<<9;
+ 8020a32:	9507      	str	r5, [sp, #28]
+ 8020a34:	e7b9      	b.n	80209aa <emulate_ACEROM_cartridge+0x97a>
+ 8020a36:	9d00      	ldr	r5, [sp, #0]
+ 8020a38:	e6fb      	b.n	8020832 <emulate_ACEROM_cartridge+0x802>
+ 8020a3a:	9d00      	ldr	r5, [sp, #0]
+ 8020a3c:	e6df      	b.n	80207fe <emulate_ACEROM_cartridge+0x7ce>
+ 8020a3e:	9d00      	ldr	r5, [sp, #0]
+ 8020a40:	e712      	b.n	8020868 <emulate_ACEROM_cartridge+0x838>
+ 8020a42:	9900      	ldr	r1, [sp, #0]
+ 8020a44:	e6a4      	b.n	8020790 <emulate_ACEROM_cartridge+0x760>
+ 8020a46:	9a00      	ldr	r2, [sp, #0]
+ 8020a48:	e68a      	b.n	8020760 <emulate_ACEROM_cartridge+0x730>
 			    	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
- 8020a36:	882a      	ldrh	r2, [r5, #0]
- 8020a38:	b292      	uxth	r2, r2
- 8020a3a:	42a2      	cmp	r2, r4
- 8020a3c:	d10d      	bne.n	8020a5a <emulate_ACEROM_cartridge+0xa2a>
- 8020a3e:	f04f 5300 	mov.w	r3, #536870912	; 0x20000000
- 8020a42:	465f      	mov	r7, fp
- 8020a44:	f8d3 c020 	ldr.w	ip, [r3, #32]
- 8020a48:	4633      	mov	r3, r6
- 8020a4a:	f89c 6000 	ldrb.w	r6, [ip]
- 8020a4e:	882a      	ldrh	r2, [r5, #0]
- 8020a50:	b292      	uxth	r2, r2
- 8020a52:	42a2      	cmp	r2, r4
- 8020a54:	b2f6      	uxtb	r6, r6
- 8020a56:	d0f7      	beq.n	8020a48 <emulate_ACEROM_cartridge+0xa18>
- 8020a58:	46bb      	mov	fp, r7
+ 8020a4a:	8801      	ldrh	r1, [r0, #0]
+ 8020a4c:	b289      	uxth	r1, r1
+ 8020a4e:	4299      	cmp	r1, r3
+ 8020a50:	d10c      	bne.n	8020a6c <emulate_ACEROM_cartridge+0xa3c>
+ 8020a52:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
+ 8020a56:	f8d1 e020 	ldr.w	lr, [r1, #32]
+ 8020a5a:	4625      	mov	r5, r4
+ 8020a5c:	f89e 4000 	ldrb.w	r4, [lr]
+ 8020a60:	8801      	ldrh	r1, [r0, #0]
+ 8020a62:	b289      	uxth	r1, r1
+ 8020a64:	4299      	cmp	r1, r3
+ 8020a66:	b2e4      	uxtb	r4, r4
+ 8020a68:	d0f7      	beq.n	8020a5a <emulate_ACEROM_cartridge+0xa2a>
+ 8020a6a:	9500      	str	r5, [sp, #0]
 			        myFractionalCounters[index] = (uint32_t)((myFractionalCounters[index] & myFractionalLowMask) | (uint32_t) (data_prev << 8));
- 8020a5a:	aa26      	add	r2, sp, #152	; 0x98
- 8020a5c:	eb02 0080 	add.w	r0, r2, r0, lsl #2
-			        break;
- 8020a60:	46a4      	mov	ip, r4
+ 8020a6c:	a922      	add	r1, sp, #136	; 0x88
+ 8020a6e:	eb01 0c8c 	add.w	ip, r1, ip, lsl #2
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020a72:	f04f 5100 	mov.w	r1, #536870912	; 0x20000000
 			        myFractionalCounters[index] = (uint32_t)((myFractionalCounters[index] & myFractionalLowMask) | (uint32_t) (data_prev << 8));
- 8020a62:	f850 2c20 	ldr.w	r2, [r0, #-32]
- 8020a66:	f402 2270 	and.w	r2, r2, #983040	; 0xf0000
- 8020a6a:	ea42 2203 	orr.w	r2, r2, r3, lsl #8
- 8020a6e:	f840 2c20 	str.w	r2, [r0, #-32]
+ 8020a76:	9d00      	ldr	r5, [sp, #0]
+        while (((addr = ADDR_IN) != addr_prev)) 
+ 8020a78:	69c8      	ldr	r0, [r1, #28]
+			        myFractionalCounters[index] = (uint32_t)((myFractionalCounters[index] & myFractionalLowMask) | (uint32_t) (data_prev << 8));
+ 8020a7a:	f85c 1c20 	ldr.w	r1, [ip, #-32]
+ 8020a7e:	f401 2170 	and.w	r1, r1, #983040	; 0xf0000
+ 8020a82:	ea41 2105 	orr.w	r1, r1, r5, lsl #8
+ 8020a86:	f84c 1c20 	str.w	r1, [ip, #-32]
 			prev_rom = 0;
- 8020a72:	2000      	movs	r0, #0
-			        break;
- 8020a74:	f7ff bb59 	b.w	802012a <emulate_ACEROM_cartridge+0xfa>
-										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[0] + (myMusicCounters[0] >> 27)] +
- 8020a78:	9804      	ldr	r0, [sp, #16]
- 8020a7a:	9a0e      	ldr	r2, [sp, #56]	; 0x38
- 8020a7c:	eb02 62d0 	add.w	r2, r2, r0, lsr #27
- 8020a80:	f102 5280 	add.w	r2, r2, #268435456	; 0x10000000
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[1] + (myMusicCounters[1] >> 27)] +
- 8020a84:	9805      	ldr	r0, [sp, #20]
-										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[0] + (myMusicCounters[0] >> 27)] +
- 8020a86:	f892 6c00 	ldrb.w	r6, [r2, #3072]	; 0xc00
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[1] + (myMusicCounters[1] >> 27)] +
- 8020a8a:	9a0d      	ldr	r2, [sp, #52]	; 0x34
- 8020a8c:	eb02 62d0 	add.w	r2, r2, r0, lsr #27
- 8020a90:	f102 5280 	add.w	r2, r2, #268435456	; 0x10000000
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[2] + (myMusicCounters[2] >> 27)] );
- 8020a94:	9806      	ldr	r0, [sp, #24]
-										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[0] + (myMusicCounters[0] >> 27)] +
- 8020a96:	f892 2c00 	ldrb.w	r2, [r2, #3072]	; 0xc00
- 8020a9a:	4416      	add	r6, r2
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[2] + (myMusicCounters[2] >> 27)] );
- 8020a9c:	9a0f      	ldr	r2, [sp, #60]	; 0x3c
- 8020a9e:	eb02 62d0 	add.w	r2, r2, r0, lsr #27
- 8020aa2:	f102 5280 	add.w	r2, r2, #268435456	; 0x10000000
-								data = (uint8_t)
- 8020aa6:	f892 2c00 	ldrb.w	r2, [r2, #3072]	; 0xc00
- 8020aaa:	4416      	add	r6, r2
- 8020aac:	b2f6      	uxtb	r6, r6
-								break;
- 8020aae:	e436      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
+ 8020a8a:	f04f 0c00 	mov.w	ip, #0
+ 8020a8e:	4619      	mov	r1, r3
+ 8020a90:	f7ff bb5f 	b.w	8020152 <emulate_ACEROM_cartridge+0x122>
+						switch(index)
+ 8020a94:	2805      	cmp	r0, #5
+ 8020a96:	f63f adf8 	bhi.w	802068a <emulate_ACEROM_cartridge+0x65a>
+ 8020a9a:	e8df f000 	tbb	[pc, r0]
+ 8020a9e:	313b      	.short	0x313b
+ 8020aa0:	0626292d 	.word	0x0626292d
+ 8020aa4:	4926      	ldr	r1, [pc, #152]	; (8020b40 <emulate_ACEROM_cartridge+0xb10>)
+ 8020aa6:	9103      	str	r1, [sp, #12]
+ 8020aa8:	e645      	b.n	8020736 <emulate_ACEROM_cartridge+0x706>
+										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[i] + (myMusicCounters[i] >> 27)]); 
+ 8020aaa:	f8bd 1024 	ldrh.w	r1, [sp, #36]	; 0x24
+ 8020aae:	eb01 61d9 	add.w	r1, r1, r9, lsr #27
+ 8020ab2:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 8020ab6:	f501 3186 	add.w	r1, r1, #68608	; 0x10c00
+								data += (uint8_t)
+ 8020aba:	7808      	ldrb	r0, [r1, #0]
+										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[i] + (myMusicCounters[i] >> 27)]); 
+ 8020abc:	f8bd 1026 	ldrh.w	r1, [sp, #38]	; 0x26
+ 8020ac0:	eb01 61db 	add.w	r1, r1, fp, lsr #27
+ 8020ac4:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 8020ac8:	f501 3186 	add.w	r1, r1, #68608	; 0x10c00
+								data += (uint8_t)
+ 8020acc:	7809      	ldrb	r1, [r1, #0]
+ 8020ace:	4408      	add	r0, r1
+										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[i] + (myMusicCounters[i] >> 27)]); 
+ 8020ad0:	f8bd 1028 	ldrh.w	r1, [sp, #40]	; 0x28
+ 8020ad4:	eb01 61da 	add.w	r1, r1, sl, lsr #27
+ 8020ad8:	f101 5100 	add.w	r1, r1, #536870912	; 0x20000000
+ 8020adc:	f501 3186 	add.w	r1, r1, #68608	; 0x10c00
+								data += (uint8_t)
+ 8020ae0:	7809      	ldrb	r1, [r1, #0]
+ 8020ae2:	fa51 f080 	uxtab	r0, r1, r0
+ 8020ae6:	b2c4      	uxtb	r4, r0
+								for (int i=0;i<3;i++) {
+ 8020ae8:	e53f      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
 								data = (uint8_t)((myRandomNumber>>24) & 0xFF);
- 8020ab0:	9a03      	ldr	r2, [sp, #12]
- 8020ab2:	0e16      	lsrs	r6, r2, #24
+ 8020aea:	9903      	ldr	r1, [sp, #12]
+ 8020aec:	0e0c      	lsrs	r4, r1, #24
 								break;
- 8020ab4:	e433      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
+ 8020aee:	e53c      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
 								data = (uint8_t)((myRandomNumber>>16) & 0xFF);
- 8020ab6:	9a03      	ldr	r2, [sp, #12]
- 8020ab8:	f3c2 4607 	ubfx	r6, r2, #16, #8
+ 8020af0:	9903      	ldr	r1, [sp, #12]
+ 8020af2:	f3c1 4407 	ubfx	r4, r1, #16, #8
 								break;
- 8020abc:	e42f      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
-											((0x10adab1e^myRandomNumber) << 11) | ((0x10adab1e^myRandomNumber) >> 21) :
- 8020abe:	9803      	ldr	r0, [sp, #12]
- 8020ac0:	2800      	cmp	r0, #0
- 8020ac2:	db11      	blt.n	8020ae8 <emulate_ACEROM_cartridge+0xab8>
- 8020ac4:	9a03      	ldr	r2, [sp, #12]
- 8020ac6:	ea4f 5272 	mov.w	r2, r2, ror #21
- 8020aca:	9203      	str	r2, [sp, #12]
-								data = (uint8_t)myRandomNumber;
- 8020acc:	f89d 600c 	ldrb.w	r6, [sp, #12]
-								break;
- 8020ad0:	e425      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
-								myRandomNumber = (((myRandomNumber & (1<<10)) ? 0x10adab1e : 0x00)
- 8020ad2:	9e03      	ldr	r6, [sp, #12]
- 8020ad4:	480c      	ldr	r0, [pc, #48]	; (8020b08 <emulate_ACEROM_cartridge+0xad8>)
- 8020ad6:	f416 6280 	ands.w	r2, r6, #1024	; 0x400
- 8020ada:	bf18      	it	ne
- 8020adc:	4602      	movne	r2, r0
- 8020ade:	ea82 22f6 	eor.w	r2, r2, r6, ror #11
- 8020ae2:	9203      	str	r2, [sp, #12]
-								data = (uint8_t)myRandomNumber;
- 8020ae4:	b2d6      	uxtb	r6, r2
-								break;
- 8020ae6:	e41a      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
-											((0x10adab1e^myRandomNumber) << 11) | ((0x10adab1e^myRandomNumber) >> 21) :
- 8020ae8:	4a08      	ldr	r2, [pc, #32]	; (8020b0c <emulate_ACEROM_cartridge+0xadc>)
- 8020aea:	ea82 22c0 	eor.w	r2, r2, r0, lsl #11
- 8020aee:	f080 5085 	eor.w	r0, r0, #278921216	; 0x10a00000
- 8020af2:	ea42 5250 	orr.w	r2, r2, r0, lsr #21
- 8020af6:	9203      	str	r2, [sp, #12]
- 8020af8:	e7e8      	b.n	8020acc <emulate_ACEROM_cartridge+0xa9c>
+ 8020af6:	e538      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
 								data = (uint8_t)((myRandomNumber>>8) & 0xFF);
- 8020afa:	9a03      	ldr	r2, [sp, #12]
- 8020afc:	f3c2 2607 	ubfx	r6, r2, #8, #8
+ 8020af8:	9903      	ldr	r1, [sp, #12]
+ 8020afa:	f3c1 2407 	ubfx	r4, r1, #8, #8
 								break;
- 8020b00:	e40d      	b.n	802031e <emulate_ACEROM_cartridge+0x2ee>
- 8020b02:	bf00      	nop
- 8020b04:	20000c09 	.word	0x20000c09
- 8020b08:	10adab1e 	.word	0x10adab1e
- 8020b0c:	6d58f000 	.word	0x6d58f000
+ 8020afe:	e534      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+											((0x10adab1e^myRandomNumber) << 11) | ((0x10adab1e^myRandomNumber) >> 21) :
+ 8020b00:	9803      	ldr	r0, [sp, #12]
+ 8020b02:	2800      	cmp	r0, #0
+ 8020b04:	db11      	blt.n	8020b2a <emulate_ACEROM_cartridge+0xafa>
+ 8020b06:	9903      	ldr	r1, [sp, #12]
+ 8020b08:	ea4f 5171 	mov.w	r1, r1, ror #21
+ 8020b0c:	9103      	str	r1, [sp, #12]
+								data = (uint8_t)myRandomNumber;
+ 8020b0e:	f89d 400c 	ldrb.w	r4, [sp, #12]
+								break;
+ 8020b12:	e52a      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+								myRandomNumber = (((myRandomNumber & (1<<10)) ? 0x10adab1e : 0x00)
+ 8020b14:	9c03      	ldr	r4, [sp, #12]
+ 8020b16:	480b      	ldr	r0, [pc, #44]	; (8020b44 <emulate_ACEROM_cartridge+0xb14>)
+ 8020b18:	f414 6180 	ands.w	r1, r4, #1024	; 0x400
+ 8020b1c:	bf18      	it	ne
+ 8020b1e:	4601      	movne	r1, r0
+ 8020b20:	ea81 21f4 	eor.w	r1, r1, r4, ror #11
+ 8020b24:	9103      	str	r1, [sp, #12]
+								data = (uint8_t)myRandomNumber;
+ 8020b26:	b2cc      	uxtb	r4, r1
+								break;
+ 8020b28:	e51f      	b.n	802056a <emulate_ACEROM_cartridge+0x53a>
+											((0x10adab1e^myRandomNumber) << 11) | ((0x10adab1e^myRandomNumber) >> 21) :
+ 8020b2a:	4907      	ldr	r1, [pc, #28]	; (8020b48 <emulate_ACEROM_cartridge+0xb18>)
+ 8020b2c:	ea81 21c0 	eor.w	r1, r1, r0, lsl #11
+ 8020b30:	f080 5085 	eor.w	r0, r0, #278921216	; 0x10a00000
+ 8020b34:	ea41 5150 	orr.w	r1, r1, r0, lsr #21
+ 8020b38:	9103      	str	r1, [sp, #12]
+ 8020b3a:	e7e8      	b.n	8020b0e <emulate_ACEROM_cartridge+0xade>
+ 8020b3c:	20000c09 	.word	0x20000c09
+ 8020b40:	70435044 	.word	0x70435044
+ 8020b44:	10adab1e 	.word	0x10adab1e
+ 8020b48:	6d58f000 	.word	0x6d58f000
+ 8020b4c:	40026400 	.word	0x40026400
 
 Disassembly of section .text.memcpy:
 
-08020b10 <memcpy>:
- 8020b10:	440a      	add	r2, r1
- 8020b12:	4291      	cmp	r1, r2
- 8020b14:	f100 33ff 	add.w	r3, r0, #4294967295	; 0xffffffff
- 8020b18:	d100      	bne.n	8020b1c <memcpy+0xc>
- 8020b1a:	4770      	bx	lr
- 8020b1c:	b510      	push	{r4, lr}
- 8020b1e:	f811 4b01 	ldrb.w	r4, [r1], #1
- 8020b22:	f803 4f01 	strb.w	r4, [r3, #1]!
- 8020b26:	4291      	cmp	r1, r2
- 8020b28:	d1f9      	bne.n	8020b1e <memcpy+0xe>
- 8020b2a:	bd10      	pop	{r4, pc}
+08020b50 <memcpy>:
+ 8020b50:	440a      	add	r2, r1
+ 8020b52:	4291      	cmp	r1, r2
+ 8020b54:	f100 33ff 	add.w	r3, r0, #4294967295	; 0xffffffff
+ 8020b58:	d100      	bne.n	8020b5c <memcpy+0xc>
+ 8020b5a:	4770      	bx	lr
+ 8020b5c:	b510      	push	{r4, lr}
+ 8020b5e:	f811 4b01 	ldrb.w	r4, [r1], #1
+ 8020b62:	f803 4f01 	strb.w	r4, [r3, #1]!
+ 8020b66:	4291      	cmp	r1, r2
+ 8020b68:	d1f9      	bne.n	8020b5e <memcpy+0xe>
+ 8020b6a:	bd10      	pop	{r4, pc}
 
 Disassembly of section .text.memset:
 
-08020b2c <memset>:
- 8020b2c:	4402      	add	r2, r0
- 8020b2e:	4603      	mov	r3, r0
- 8020b30:	4293      	cmp	r3, r2
- 8020b32:	d100      	bne.n	8020b36 <memset+0xa>
- 8020b34:	4770      	bx	lr
- 8020b36:	f803 1b01 	strb.w	r1, [r3], #1
- 8020b3a:	e7f9      	b.n	8020b30 <memset+0x4>
+08020b6c <memset>:
+ 8020b6c:	4402      	add	r2, r0
+ 8020b6e:	4603      	mov	r3, r0
+ 8020b70:	4293      	cmp	r3, r2
+ 8020b72:	d100      	bne.n	8020b76 <memset+0xa>
+ 8020b74:	4770      	bx	lr
+ 8020b76:	f803 1b01 	strb.w	r1, [r3], #1
+ 8020b7a:	e7f9      	b.n	8020b70 <memset+0x4>

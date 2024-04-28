@@ -17,7 +17,7 @@ Custom:
  bx r0
 
 .thumb
- ldr r0,=0x10000024
+ ldr r0,=0x20010024
  ldr r2,[r0]
  cmp r2,#0
  bmi skipcopy

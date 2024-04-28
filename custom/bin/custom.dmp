@@ -41,10 +41,10 @@ skipcopy():
 return_to_DPC():
 20000c34:	bc02      	pop	{r1}
 20000c36:	4708      	bx	r1
-20000c38:	10000024 	.word	0x10000024
+20000c38:	20010024 	.word	0x20010024
 20000c3c:	200013d0 	.word	0x200013d0
-20000c40:	10001c2c 	.word	0x10001c2c
-20000c44:	10001c00 	.word	0x10001c00
+20000c40:	20011c2c 	.word	0x20011c2c
+20000c44:	20011c00 	.word	0x20011c00
 20000c48:	20000c35 	.word	0x20000c35
 20000c4c:	20000e09 	.word	0x20000e09
 
@@ -94,7 +94,7 @@ void my_memcpy(unsigned char* destination, unsigned char* source, int offset, in
         for(i=0;i<count;i++)
 20000ca0:	e7f2      	b.n	20000c88 <my_memcpy+0x8>
 20000ca2:	46c0      	nop			; (mov r8, r8)
-20000ca4:	10001c2c 	.word	0x10001c2c
+20000ca4:	20011c2c 	.word	0x20011c2c
 
 20000ca8 <my_memset>:
 my_memset():
@@ -208,7 +208,7 @@ unsigned int get32bitdff(int offset)
 }
 20000d08:	4770      	bx	lr
 20000d0a:	46c0      	nop			; (mov r8, r8)
-20000d0c:	10001c2c 	.word	0x10001c2c
+20000d0c:	20011c2c 	.word	0x20011c2c
 
 20000d10 <get32bitdf>:
 get32bitdf():
@@ -227,7 +227,7 @@ unsigned int get32bitdf(int offset)
 /home/steve/relocateBB/custom/main.c:217
 }
 20000d1e:	4770      	bx	lr
-20000d20:	10001c2c 	.word	0x10001c2c
+20000d20:	20011c2c 	.word	0x20011c2c
 
 20000d24 <checkswap>:
 checkswap():
@@ -309,7 +309,7 @@ checkswap():
 }
 20000d64:	bd10      	pop	{r4, pc}
 20000d66:	46c0      	nop			; (mov r8, r8)
-20000d68:	10001c00 	.word	0x10001c00
+20000d68:	20011c00 	.word	0x20011c00
 
 20000d6c <copynybble>:
 copynybble():
@@ -387,8 +387,8 @@ void copynybble(unsigned char num)
 /home/steve/relocateBB/custom/main.c:276
 }
 20000dbe:	bdf7      	pop	{r0, r1, r2, r4, r5, r6, r7, pc}
-20000dc0:	10001c2c 	.word	0x10001c2c
-20000dc4:	10001c00 	.word	0x10001c00
+20000dc0:	20011c2c 	.word	0x20011c2c
+20000dc4:	20011c00 	.word	0x20011c00
 
 20000dc8 <on_off_flip>:
 on_off_flip():
@@ -446,8 +446,8 @@ void on_off_flip(unsigned int loc, unsigned int fnmask)
 20000dfa:	404b      	eors	r3, r1
 20000dfc:	e7f3      	b.n	20000de6 <on_off_flip+0x1e>
 20000dfe:	46c0      	nop			; (mov r8, r8)
-20000e00:	10001c00 	.word	0x10001c00
-20000e04:	10001c2c 	.word	0x10001c2c
+20000e00:	20011c00 	.word	0x20011c00
+20000e04:	20011c2c 	.word	0x20011c2c
 
 20000e08 <main>:
 main():
@@ -1151,9 +1151,9 @@ int main()
 20001134:	3301      	adds	r3, #1
 20001136:	e6a4      	b.n	20000e82 <main+0x7a>
 20001138:	200013ac 	.word	0x200013ac
-2000113c:	10001c00 	.word	0x10001c00
-20001140:	10001c2c 	.word	0x10001c2c
-20001144:	10001c14 	.word	0x10001c14
+2000113c:	20011c00 	.word	0x20011c00
+20001140:	20011c2c 	.word	0x20011c2c
+20001144:	20011c14 	.word	0x20011c14
 20001148:	000001ff 	.word	0x000001ff
 2000114c:	00000e1e 	.word	0x00000e1e
 /home/steve/relocateBB/custom/main.c:464
@@ -1454,8 +1454,8 @@ int main()
 200012e4:	e61c      	b.n	20000f20 <main+0x118>
 200012e6:	46c0      	nop			; (mov r8, r8)
 200012e8:	2000138c 	.word	0x2000138c
-200012ec:	10001c00 	.word	0x10001c00
-200012f0:	10001c2c 	.word	0x10001c2c
+200012ec:	20011c00 	.word	0x20011c00
+200012f0:	20011c2c 	.word	0x20011c2c
 200012f4:	000001ff 	.word	0x000001ff
 200012f8:	20001c00 	.word	0x20001c00
 

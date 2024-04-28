@@ -901,9 +901,9 @@ extern volatile unsigned char *queue;
 extern volatile unsigned char *flashdata;
 # 12 "main.c" 2
 # 39 "main.c"
-volatile unsigned char *queue=(unsigned char *)0x10000C00;
+volatile unsigned char *queue=(unsigned char *)0x20010C00;
 volatile unsigned char *flashdata=(unsigned char *)0x20000C00;
-volatile int *queue_int=(int *)0x10000C00;
+volatile int *queue_int=(int *)0x20010C00;
 enum {
 SpriteGfxIndex,
 junk1,
@@ -995,9 +995,9 @@ player9color, junk14
 
 
 
-unsigned char *C_function=(unsigned int *)(0x10000C00 + 0x1A4);
+unsigned char *C_function=(unsigned int *)(0x20010C00 + 0x1A4);
 unsigned short *fetcher_address_table=(unsigned short *)(0x20000C00 + 0x61A0);
-unsigned char *RIOT=(unsigned char *)(0x10000C00 + 0x1A8);
+unsigned char *RIOT=(unsigned char *)(0x20010C00 + 0x1A8);
 
 unsigned char *fetcheraddr;
 unsigned char *pfpixel;

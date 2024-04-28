@@ -66,9 +66,9 @@ ARM GAS  main.s 			page 1
   36:main.c        **** // NOTE : Compiled code can be significantly smaller if you use INTs for your variables instead of
   37:main.c        **** //        SHORTs or CHARs.
   38:main.c        **** 
-  39:main.c        **** volatile unsigned char *queue=(unsigned char *)0x10000C00;
+  39:main.c        **** volatile unsigned char *queue=(unsigned char *)0x20010C00;
   40:main.c        **** volatile unsigned char *flashdata=(unsigned char *)0x20000C00;
-  41:main.c        **** volatile int *queue_int=(int *)0x10000C00;
+  41:main.c        **** volatile int *queue_int=(int *)0x20010C00;
   42:main.c        **** enum {
   43:main.c        **** SpriteGfxIndex,
   44:main.c        **** junk1,
@@ -163,9 +163,9 @@ ARM GAS  main.s 			page 1
  130:main.c        **** // global variables are those found outside of any function.  They can be used by any function.
  131:main.c        **** // The Harmony Cartridge preserves these values for you between ARM code calls.
  132:main.c        **** 
- 133:main.c        **** unsigned char *C_function=(unsigned int *)(0x10000C00 + 0x1A4);
+ 133:main.c        **** unsigned char *C_function=(unsigned int *)(0x20010C00 + 0x1A4);
  134:main.c        **** unsigned short *fetcher_address_table=(unsigned short *)(0x20000C00 + 0x61A0);
- 135:main.c        **** unsigned char *RIOT=(unsigned char *)(0x10000C00 + 0x1A8);
+ 135:main.c        **** unsigned char *RIOT=(unsigned char *)(0x20010C00 + 0x1A8);
  136:main.c        **** //unsigned char *HMdiv=(unsigned char *)(0x20000c00+0x1000);
  137:main.c        **** unsigned char *fetcheraddr;
  138:main.c        **** unsigned char *pfpixel;
@@ -2894,13 +2894,13 @@ ARM GAS  main.s 			page 1
  1832              		.align	2
  1833              		.set	.LANCHOR1,. + 0
  1836              	RIOT:
- 1837 0000 A80D0010 		.word	268438952
+ 1837 0000 A80D0120 		.word	536939944
  1840              	queue:
- 1841 0004 000C0010 		.word	268438528
+ 1841 0004 000C0120 		.word	536939520
  1844              	flashdata:
  1845 0008 000C0020 		.word	536873984
  1848              	C_function:
- 1849 000c A40D0010 		.word	268438948
+ 1849 000c A40D0120 		.word	536939940
  1852              	fetcher_address_table:
  1853 0010 A06D0020 		.word	536898976
  1856              	myGfxIndex:
@@ -2912,7 +2912,7 @@ ARM GAS  main.s 			page 1
  1861      04050607 
  1861      0800
  1864              	queue_int:
- 1865 0028 000C0010 		.word	268438528
+ 1865 0028 000C0120 		.word	536939520
  1866              		.bss
  1867              		.align	2
  1868              		.set	.LANCHOR0,. + 0

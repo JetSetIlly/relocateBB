@@ -1834,11 +1834,11 @@ maskdata:
 	.type	RIOT, %object
 	.size	RIOT, 4
 RIOT:
-	.word	268438952
+	.word	536939944
 	.type	queue, %object
 	.size	queue, 4
 queue:
-	.word	268438528
+	.word	536939520
 	.type	flashdata, %object
 	.size	flashdata, 4
 flashdata:
@@ -1846,7 +1846,7 @@ flashdata:
 	.type	C_function, %object
 	.size	C_function, 4
 C_function:
-	.word	268438948
+	.word	536939940
 	.type	fetcher_address_table, %object
 	.size	fetcher_address_table, 4
 fetcher_address_table:
@@ -1862,7 +1862,7 @@ spritesort:
 	.type	queue_int, %object
 	.size	queue_int, 4
 queue_int:
-	.word	268438528
+	.word	536939520
 	.bss
 	.align	2
 	.set	.LANCHOR0,. + 0

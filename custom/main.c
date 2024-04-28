@@ -36,9 +36,9 @@
 // NOTE : Compiled code can be significantly smaller if you use INTs for your variables instead of
 //        SHORTs or CHARs.
 
-volatile unsigned char *queue=(unsigned char *)0x10000C00;
+volatile unsigned char *queue=(unsigned char *)0x20010C00;
 volatile unsigned char *flashdata=(unsigned char *)0x20000C00;
-volatile int *queue_int=(int *)0x10000C00;
+volatile int *queue_int=(int *)0x20010C00;
 enum {
 SpriteGfxIndex,
 junk1,
@@ -130,9 +130,9 @@ player9color, junk14
 // global variables are those found outside of any function.  They can be used by any function.
 // The Harmony Cartridge preserves these values for you between ARM code calls.
 
-unsigned char *C_function=(unsigned int *)(0x10000C00 + 0x1A4);
+unsigned char *C_function=(unsigned int *)(0x20010C00 + 0x1A4);
 unsigned short *fetcher_address_table=(unsigned short *)(0x20000C00 + 0x61A0);
-unsigned char *RIOT=(unsigned char *)(0x10000C00 + 0x1A8);
+unsigned char *RIOT=(unsigned char *)(0x20010C00 + 0x1A8);
 //unsigned char *HMdiv=(unsigned char *)(0x20000c00+0x1000);
 unsigned char *fetcheraddr;
 unsigned char *pfpixel;

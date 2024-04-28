@@ -9,15 +9,14 @@
 #include "flash.h"
 #include "cartridge_firmware.h"
 
+#define DELAY_tADS      {__asm__ __volatile__("nop");} //Delay to work stably on *some* consoles.
+
 /* 
   PlusCart/Unocart Unified ACE Driver for DPC+
-  v1.02 2024-03-21 
-  v1.03 2024-04-03
-  v1.04 2024-04-03 
+  v1.05 2024-04-28 
   
   This source is compiled and included in bB games compiled for PlusCart/Unocart.
   Based off cartridge_emulation_dpcp.c Created on: 07.07.2020 Author: stubig, adaption to ACE by Marco Johannes and JetSetIlly
-    
 */
 
 int emulate_ACEROM_cartridge()
@@ -27,11 +26,11 @@ int emulate_ACEROM_cartridge()
 	
 	uint8_t* cart_rom = (uint8_t*)*buffer32; //Base for flash where ACE ROM is mounted (varies) 
 	buffer32++;
-//	uint8_t* ccm_ram = (uint8_t*)*buffer32; //Position of CCM used by PlusCart; not used in this instance.
+//	uint8_t* dpcram_ram = (uint8_t*)*buffer32; //Position of dpcram used by PlusCart; not used in this instance.
 	buffer32++;
 	bool (*reboot_into_cartridge_ptr)() =(bool(*)())(uint32_t)*buffer32; //Pointer to library function for removing loading screen and enterring game.
 	buffer32++;
-	void (*ReturnVector)() = (void(*)())(uint32_t)*buffer32; //Pointer to library function for exiting game and returning to menu.
+	void (*ReturnToMenu)() = (void(*)())(uint32_t)*buffer32; //Pointer to library function for exiting game and returning to menu.
 	buffer32++;
 	uint32_t PassedSystemCoreClock = (uint32_t)*buffer32; //SystemCoreClock definition that is passed to game (for timer related calculations).
 //	buffer32++;
@@ -44,25 +43,37 @@ int emulate_ACEROM_cartridge()
 //	volatile uint16_t** DATA_MODER = (volatile uint16_t**)0x20000028UL;
 
 //END OF ACE PARAMETERS//
-	SysTick_Config(PassedSystemCoreClock / 1193192);// 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
+//	SysTick_Config(PassedSystemCoreClock / 100 );// 1182298 PAL / 1193192 NTSC ? 21000?? 800 ==  ?? //The System tick is calculated off passed SystemCoreClock parameter.
+
+
+	//Set up the TIM2 counter for 20,000 Hz frequency.
+	__HAL_RCC_TIM2_CLK_ENABLE(); //Start up Timer 2
+	TIM2->PSC=(((PassedSystemCoreClock/2))/20000)-1; //Prescaler is based on the "20000" magic number used by DPC+. Value Should be 5399 with STM32 at 216 MHz.
+	TIM2->EGR = TIM_EGR_UG; //Load prescaler
+	TIM2->CR1=0; //Reset Timer Options - Count up, no divisions.
+	TIM2->ARR=0xFFFFFFFF; //Reload value
+	TIM2->CNT=TIM2->ARR; //Set Timer to wrap around
+	TIM2->CR1 |= TIM_CR1_CEN; //Enable Timer
 
 	
 	uint8_t* buffer = (uint8_t*)0x20000000; //Set up pointer to 128kB RAM - Used for copying game image to RAM.
-    uint8_t* ccm = (uint8_t*)0x10000000; //Set up pointer for 64kB CCM RAM - Used for DPC+ RAM. 
+    uint8_t* dpcram = (uint8_t*)0x20010000; //Set up pointer for 64kB dpcram RAM - Used for DPC+ RAM. 
 	
-	memset(ccm, 0x00, 0xFFFF); //Clear the CCM before running the ROM.
+
 	memcpy(buffer+0x8000, buffer+0x1c, 0x10); //Copy above hardware port pointers to safety.
 	memcpy(buffer, cart_rom, 0x8000); //Copy game image into RAM.
 	memcpy(buffer+0x1c,buffer+0x8000, 0x10); //Copy the Hardware pointers back into the right spot
-	memcpy(ccm + 0xc00, buffer + 0x6c00, 0x1400); // Copy DPC+ Display and Frequency Data 5k data into CCM.
+	memset(dpcram, 0x00, 0x7FFF); //Clear the dpcram before running the ROM.
+	memcpy(dpcram + 0xc00, buffer + 0x6c00, 0x1400); // Copy DPC+ Display and Frequency Data 5k data into dpcram.
 
 	//DPC+ variables
-	uint32_t systick_lastval = 0;
+//	uint32_t systick_lastval = 0;
 	uint8_t prev_rom = 0;
-    uint16_t addr, addr_prev = 0, addr_prev2 = 0, tmp_addr=0;
+	uint8_t joy_status = 0;
+    uint16_t addr, addr_prev = 0;
     uint8_t data = 0, data_prev = 0;
 	uint8_t *myProgramImage = buffer + 3*1024, *bankPtr = buffer + 23*1024;
-	uint8_t *myDisplayImage = ccm + 0xc00, *myFrequencyImage = ccm + 0x1c00;
+	uint8_t *myDisplayImage = dpcram + 0xc00, *myFrequencyImage = dpcram + 0x1c00;
 	uint32_t myFractionalCounters[8] = {0,0,0,0,0,0,0,0};
 	uint32_t myMusicCounters[3] = {0,0,0}, myMusicFrequencies[3] = {0,0,0};
 	uint8_t  myTops[8] = {0,0,0,0,0,0,0,0}, myBottoms[8] = {0,0,0,0,0,0,0,0};
@@ -74,7 +85,7 @@ int emulate_ACEROM_cartridge()
 
     // Datafetcher copy stuff for CALLFUNCTION PARAMETER
     uint8_t *source = NULL, *destination = NULL;
-    uint8_t myDataFetcherCopyPointer = 0, myDataFetcherCopyType = 0, myDataFetcherCopyValue = 0;
+ //   uint8_t myDataFetcherCopyPointer = 0;// , myDataFetcherCopyType = 0;myDataFetcherCopyValue = 0;
 
 	uint32_t thumb_code_entry_point = 0x20000c09;
 
@@ -87,9 +98,11 @@ int emulate_ACEROM_cartridge()
 	uint32_t myFractionalLowMask = 0x0F0000;
 
 	// Initialise the DPC's random number generator register
-	uint32_t myRandomNumber = 0x70435044; // "DPCp";
+	uint32_t myRandomNumber = 0x70435044; // "DPCp"
+	uint32_t systick_lastval=0;
+	//Initialise DMA Transfer Clock
+	RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
 
-#define DELAY_tADS      {__asm__ __volatile__("nop");__asm__ __volatile__("nop");} //Delay to work stably on *some* consoles.
 
    if (!((bool (*)())reboot_into_cartridge_ptr)()) return 1; //Remove menu and start game
 
@@ -98,9 +111,9 @@ int emulate_ACEROM_cartridge()
 	
 	while (1)
 	{ 
-        while (((addr = ADDR_IN) != addr_prev) || (addr != addr_prev2))
+        while (((addr = ADDR_IN) != addr_prev)) 
         {
-            addr_prev2 = addr_prev;
+            DELAY_tADS; //Provide small delay before re-reading address
             addr_prev = addr;
         }
 		
@@ -108,7 +121,7 @@ int emulate_ACEROM_cartridge()
 		if (addr & 0x1000)
 		{ // A12 high
 
-			tmp_addr = addr; // save addr, because of possible fast fetch
+//			tmp_addr = addr; // save addr, because of possible fast fetch
 
 			if(myFastFetch && prev_rom == 0xA9 && addr > 0x107f){
 				data = (uint16_t) bankPtr[addr&0xFFF];
@@ -167,10 +180,11 @@ int emulate_ACEROM_cartridge()
 
 								// using myDisplayImage[] instead of myProgramImage[] because waveforms
 								// can be modified during runtime.
-								data = (uint8_t)
-										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[0] + (myMusicCounters[0] >> 27)] +
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[1] + (myMusicCounters[1] >> 27)] +
-										  (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[2] + (myMusicCounters[2] >> 27)] );
+								data=0;
+								for (int i=0;i<3;i++) {
+								data += (uint8_t)
+										( (uint32_t)myDisplayImage[(uint32_t)myMusicWaveforms[i] + (myMusicCounters[i] >> 27)]); 
+								}
 								break;
 							}
 
@@ -220,8 +234,8 @@ int emulate_ACEROM_cartridge()
 
 				DATA_OUT = data;
 				SET_DATA_MODE_OUT
-				addr = tmp_addr; // restore addr, because of possible fast fetch
-
+		//		addr = tmp_addr; // restore addr, because of possible fast fetch
+				addr = ADDR_IN;
 				// wait for address bus to change
 				while (ADDR_IN == addr) ;
 				SET_DATA_MODE_IN;
@@ -303,39 +317,46 @@ int emulate_ACEROM_cartridge()
 			          case 0x02:  // CALLFUNCTION
 			        	// callFunction(value);
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
+						  uint32_t Source_Pointer_Mode=0;
 			        	  switch (data_prev)
 			        	  {
 			        	    case 0: // Parameter Pointer reset
 			        	      myParameterPointer = 0;
 			        	      break;
 			        	    case 1: // Copy ROM to fetcher
-			        	    	//DMA2_Stream0->
-			        	    	myDataFetcherCopyPointer = myParameter[3];
-			        	    	myDataFetcherCopyType = (uint8_t) data_prev;
+							case 2: // Copy value to fetcher
+//			        	    	myDataFetcherCopyPointer = myParameter[3];
+//			        	    	myDataFetcherCopyType = (uint8_t) data_prev;
+								
+								if (data_prev==1) {
+									source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];  //Set ROM source as per parameters
+									destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]]; //Set RAM desintation as per parameters
+									Source_Pointer_Mode=1<<9;
+								} else {
+									source = &myParameter[0]; //Set source to be static copy value.
+									destination = &myDisplayImage[myCounters[myParameter[2]]]; //Set desintation as per parameters
+//									Source_Pointer_Mode=0;
+								}									
 
-//			        	    	source = &myProgramImage[ (*((uint16_t*)&myParameter[0])) ];
-			        	    	source = &myProgramImage[ ((((uint16_t)myParameter[1]) << 8) | myParameter[0]) ];
+								if ((DMA2_Stream0->CR&DMA_SxCR_EN)==0) { //Only proceed if DMA Transfer is complete
+									
+									//Initialise DMA Transfer parameters	
+	
+									DMA2->LIFCR= 0x0000003D; //Clear all the interrupt status bits
+									DMA2_Stream0->CR |= (0b10 << DMA_SxCR_DIR_Pos) // Memory-to-memory Mode
+											| (0b00 << DMA_SxCR_PSIZE_Pos) // Source: 8-bit
+											| (0b00 << DMA_SxCR_MSIZE_Pos) // Destination: 8-bit
+											| Source_Pointer_Mode // Increment source pointer
+											| DMA_SxCR_MINC; // Increment destination pointer
+									DMA2_Stream0->PAR = (uint32_t) (source); //Set DMA source pointer
+									DMA2_Stream0->M0AR = (uint32_t) (destination); //Set DMA destination pointer
+									DMA2_Stream0->NDTR = (uint16_t) (myParameter[3]); //Set length of DMA transfer in bytes
+									DMA2_Stream0->CR |= DMA_SxCR_EN; // Start DMA transfer
 
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2] & 0x7]];
-//			        	    	for(int i = 0; i < myParameter[3]; ++i)
-//			        	    		destination[i] = source[i];
-
-//				        	  	mROMdata = ((uint16_t)myParameter[1] << 8) + myParameter[0];
-//				        		tmp_addr = myCounters[myParameter[2] & 0x7];
-//			        	    	for(int i = 0; i < myParameter[3]; ++i)
-//			        	      		myDisplayImage[tmp_addr+i] = myProgramImage[mROMdata+i];
+								}
 
 							  myParameterPointer = 0;
 			        	      break;
-			        	    case 2: // Copy value to fetcher
-			        	    	myDataFetcherCopyPointer = myParameter[3];
-			        	    	myDataFetcherCopyType = (uint8_t) data_prev;
-			        	    	destination = &myDisplayImage[myCounters[myParameter[2]]];
-			        	    	myDataFetcherCopyValue =  myParameter[0];
-//			        	    	for(int i = 0; i < myParameter[3]; ++i)
-//			        	    		destination[i] = myParameter[0];
-			        	    	myParameterPointer = 0;
-			        	    	break;
 			        	      // Call user written ARM code (most likely be C compiled for ARM)
 			        	    case 254: // call with IRQ driven audio, special handling needed at this
 			        	              // __enable_irq();
@@ -387,16 +408,10 @@ int emulate_ACEROM_cartridge()
 			            break;
 
 			          case 0x05:  // WAVEFORM0
+					  case 0x06:  // WAVEFORM1
+					  case 0x07:  // WAVEFORM2
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicWaveforms[0] = (data_prev & 0x007f) << 5;
-				        break;
-			          case 0x06:  // WAVEFORM1
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicWaveforms[1] = (data_prev & 0x007f) << 5;
-				        break;
-			          case 0x07:  // WAVEFORM2
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicWaveforms[2] = (data_prev & 0x007f) << 5;
+				        myMusicWaveforms[(index-5)] = (data_prev & 0x007f) << 5;
 				        break;
 			          default:
 			            break;
@@ -440,16 +455,10 @@ int emulate_ACEROM_cartridge()
 			            myRandomNumber = (myRandomNumber & 0x00FFFFFF) | (((uint32_t)data_prev)<<24);
 			            break;
 			          case 0x05:  // NOTE0
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicFrequencies[0] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
-				        break;
 			          case 0x06:  // NOTE1
+			          case 0x07:  // NOTE2					  
 			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicFrequencies[1] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
-				        break;
-			          case 0x07:  // NOTE2
-			        	  while (ADDR_IN == addr) { data_prev = data & 0xff; data = DATA_IN; }
-				        myMusicFrequencies[2] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
+				        myMusicFrequencies[(index-5)] = (*((uint32_t*)&myFrequencyImage[data_prev<<2]));
 				        break;
 			          default:
 			            break;
@@ -471,9 +480,8 @@ int emulate_ACEROM_cartridge()
 
 				}
 				//while (ADDR_IN == addr);
-			}
-			else
-			{	// check bank-switch
+			} else {
+			// check bank-switch
 				if (addr >= 0x1FF6 && addr <= 0x1FFB)	// bank-switch
 					bankPtr = &myProgramImage[(addr - 0x1FF6 ) * 4*1024 ];
 
@@ -482,41 +490,28 @@ int emulate_ACEROM_cartridge()
 				DATA_OUT = prev_rom;
 				SET_DATA_MODE_OUT;
 
-				if(myDataFetcherCopyType == 0){
-//					uint32_t systick = SysTick->VAL; 
-//					uint32_t systick_clocks = systick-systick_lastval;
-					if (SysTick->VAL >= 110){ 
-						myMusicCounters[0] += (((myMusicFrequencies[0])*5)>>2); 
-						myMusicCounters[1] += (((myMusicFrequencies[1])*5)>>2); 
-						myMusicCounters[2] += (((myMusicFrequencies[2])*5)>>2); 
-						SysTick->VAL=SysTick->VAL-110;
-					} 
-	
-					while (ADDR_IN == addr);
-				}else{
-					while (ADDR_IN == addr){
-						// move copy routine for data fetchers here (non blocking !)
-						--myDataFetcherCopyPointer;
-						if(myDataFetcherCopyType == 1){
-							destination[myDataFetcherCopyPointer] = source[myDataFetcherCopyPointer];
-						}else{ // if(myDataFetcherCopyType == 2){
-							destination[myDataFetcherCopyPointer] = myDataFetcherCopyValue;
-						}
-						if(myDataFetcherCopyPointer == 0){
-							myDataFetcherCopyType = 0;
-							while (ADDR_IN == addr)
-								;
-							break;
-						}
-					}
-				}
+				//Update Music
+				uint32_t clocks = TIM2->CNT-systick_lastval; //Calculate how many times the timer has incrememented since last check
+				systick_lastval=TIM2->CNT; // Log the curent value of the Timer 	
+				for (int i=0; i<3; i++) {
+					myMusicCounters[i] += (myMusicFrequencies[i])*clocks; //Multiply music frequency incremental value by how many clocks have passed and add to counter for first waveform.
+				}	
+				
+				while (ADDR_IN == addr);
 				SET_DATA_MODE_IN;
 			}
-		}
+		} else {
+				while (ADDR_IN == addr) { data_prev = data; data = DATA_IN; }			
+			if(addr == SWCHB){
+				if( !(data_prev & 0x1) && joy_status)
+					break;
+			}else if(addr == SWCHA){
+				joy_status = !(data_prev & 0x80);
+			}
+			
+		}	
 	}
-
-	__enable_irq(); //Prepare to end game and return to menu.
-
+	DMA2_Stream0->CR=0; //Disable any DMA transfer in progress
 	DATA_OUT = 0xEA;                  // (NOP) or data for SWCHB
 	SET_DATA_MODE_OUT;
 	while (ADDR_IN == addr);
@@ -525,10 +520,9 @@ int emulate_ACEROM_cartridge()
 	DATA_OUT = 0x00;                  // (BRK)
 	while (ADDR_IN == addr);
 
-	((void (*)())ReturnVector)(); //Load menu. Note, not required here.
+	((void (*)())ReturnToMenu)();
 
 	return 0;
-
 }
 
 
