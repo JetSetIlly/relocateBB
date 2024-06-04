@@ -40,6 +40,8 @@ ACE-Driver:
 			dc.b "DPCp v1.0       "
 ```
 
+**NOTE**: The version string is `DPCp` and not `DPC+` in order to distinguish it from DPC+ binaries compiled for the Harmony type cartridges. Failure to distinguish the two types of binary would likely result in confusion. 
+
 ## bB Custom Code
 
 #### Compilation
