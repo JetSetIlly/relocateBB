@@ -1,6 +1,6 @@
 Archive member included to satisfy reference by file (symbol)
 
-/home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+/home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
                               main.o (memcpy)
 
 Discarded input sections
@@ -11,9 +11,9 @@ Discarded input sections
  .text          0x0000000000000000        0x0 main.o
  .text.checkwrap
                 0x0000000000000000        0xc main.o
- .text          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
- .data          0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
- .bss           0x0000000000000000        0x0 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .text          0x0000000000000000        0x0 /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .data          0x0000000000000000        0x0 /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .bss           0x0000000000000000        0x0 /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
 
 Memory Configuration
 
@@ -28,9 +28,9 @@ Linker script and memory map
 LOAD custom.o
 LOAD main.o
 START GROUP
-LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v6-m/nofp/libgcc.a
-LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a
-LOAD /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libc.a
+LOAD /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v6-m/nofp/libgcc.a
+LOAD /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a
+LOAD /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libc.a
 END GROUP
                 0x0000000020011fdc                _stack_end = 0x20011fdc
 
@@ -77,7 +77,7 @@ END GROUP
  .text.startup.main
                 0x0000000020000e08      0x4f4 main.o
                 0x0000000020000e08                main
- .text.memcpy   0x00000000200012fc       0x90 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .text.memcpy   0x00000000200012fc       0x90 /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
                 0x00000000200012fc                memcpy
  *(.rodata)
  .rodata        0x000000002000138c       0x20 main.o
@@ -153,7 +153,7 @@ LOAD linker stubs
  .ARM.attributes
                 0x000000000000001a       0x2b main.o
  .ARM.attributes
-                0x0000000000000045       0x2c /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+                0x0000000000000045       0x2c /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
 
 .comment        0x0000000000000000       0x45
  .comment       0x0000000000000000       0x45 main.o
@@ -188,4 +188,4 @@ LOAD linker stubs
 
 .debug_frame    0x0000000000000000      0x144
  .debug_frame   0x0000000000000000      0x114 main.o
- .debug_frame   0x0000000000000114       0x30 /home/steve/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)
+ .debug_frame   0x0000000000000114       0x30 /home/steve/cross_compilation/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/12.2.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp/libg.a(libc_a-memcpy-stub.o)

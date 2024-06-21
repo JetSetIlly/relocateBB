@@ -30,14 +30,14 @@ The relevant section of the ace.asm file is. Please follow the directives in the
 ACE-Driver:
 ; driver name should always begin with the string "DPCp " (including the space)
 ;
-; it should also include a version string of the form "vX.Y" where X and Y are
+; it should also include a version string of the form "vX.YY" where X and YY are
 ; integers
 ;
 ; nothing else should be included in the driver name apart from whitespace
 ;
 ; finally, the driver name should be exactly string 16 chars wide exactly
 ;                "                "
-			dc.b "DPCp v1.0       "
+            dc.b "DPCp v1.0       "
 ```
 
 **NOTE**: The version string is `DPCp` and not `DPC+` in order to distinguish it from DPC+ binaries compiled for the Harmony type cartridges. Failure to distinguish the two types of binary would likely result in confusion. 
