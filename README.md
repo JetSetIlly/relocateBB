@@ -2,7 +2,6 @@
 
 RelocateBB is a tool to be used with [Batari Basic](https://github.com/batari-Basic/batari-Basic) ROM files. It allows games that use the DPC+ kernel to be run on the PlusCart or the UnoCart. It will do nothing for bB games that that don't use the DPC+ kernel - those games will already run on the PlusCart and UnoCart.
 
-
 ## ACE driver
 
 #### Compilation
@@ -42,6 +41,7 @@ ACE-Driver:
 
 **NOTE**: The version string is `DPCp` and not `DPC+` in order to distinguish it from DPC+ binaries compiled for the Harmony type cartridges. Failure to distinguish the two types of binary would likely result in confusion. 
 
+
 ## bB Custom Code
 
 #### Compilation
@@ -51,7 +51,7 @@ to build.
 
 #### Changes from the Original
 
-The driver code is mostly the same as found in the Batari Basic [include/custom](https://github.com/batari-Basic/batari-Basic/tree/d0b12c1b257156645df5371da48bcbbab7682580/includes/customdirectory) directory. However, there are some significant changes.
+The driver code is mostly the same as found in the Batari Basic [include/custom](https://github.com/batari-Basic/batari-Basic/tree/d0b12c1b257156645df5371da48bcbbab7682580/includes/custom) directory. However, there are some significant changes.
 
 The most significant change is to the address space the program operates with. The first group of addresses are found in the `custom.S` and `custom.boot.S` files. The table below summarises how address ranges are changed.
 
@@ -67,4 +67,3 @@ There are also changes to the ordering of code in the `main.c` file. The logic i
 Finally, there are changes to the `Makefile`. The target architecture has been changed to `armv6-m` and the optimisation has been set to `-Oz`. This is a relatively new flag to GCC and requests more aggressive size optimisation that `-Os`. Indeed, the principle reason for the GCC v12.0 requirement is access to the `-Oz` flag.
 
 The GCC debugging flags have also been ammended. The singular `-g` flag has been replaced with `-g3 -gdwarf-4` `-gstrict-dwarf`. The debugging information isn't included in the final custom binary but it is included in the interim elf file. Also for debugging purposes the Makefile now also produces a `objdump` file.
-
