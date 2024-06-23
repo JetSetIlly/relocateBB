@@ -75,6 +75,11 @@ func main() {
 	// process all files listed on the command line
 	for i, fn := range args {
 		if check {
+			// display simplified file name depending on the number of files in
+			// the argument list
+			if len(args) > 1 {
+				fmt.Println(filepath.Base(fn))
+			}
 			err = doCheck(fn)
 		} else {
 			err = doRelocate(fn, ace)
@@ -96,18 +101,22 @@ func doCheck(fn string) error {
 		return err
 	}
 
-	// display simplified file name
-	fmt.Println(filepath.Base(fn))
-
 	// length check
 	if len(original) != 32768 {
-		return fmt.Errorf("not a PlusROM DPC+ file")
+		return fmt.Errorf("not a PlusROM DPCp or an original DPC+ file")
 	}
 
 	// check for DPCp in the first customOrigin bytes
 	dpcpCount := bytes.Count(original[:customOrigin], []byte("DPCp"))
 	if dpcpCount < 2 {
-		return fmt.Errorf("not a PlusROM DPC+ file")
+		dpcpCount = bytes.Count(original[:customOrigin], []byte("DPC+"))
+		if dpcpCount >= 2 {
+			fmt.Println("original DPC+ file")
+			fmt.Printf("driver md5: %x\n", md5.Sum(original[:customOrigin]))
+			return nil
+		}
+
+		return fmt.Errorf("not a PlusROM DPCp or an original DPC+ file")
 	}
 
 	// information about the ACE driver
@@ -129,7 +138,7 @@ func doCheck(fn string) error {
 			return fmt.Errorf("not added by this version of %s\n", programName)
 		}
 	} else {
-		fmt.Println("driverless PlusROM DPC+ file")
+		fmt.Println("driverless PlusROM DPCp file")
 	}
 
 	// information about the BB custom section
