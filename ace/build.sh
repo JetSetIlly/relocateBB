@@ -13,20 +13,38 @@ OPT="-O3"
 
 LNKFLGS="-mcpu=cortex-m4 -mthumb -static -specs=nano.specs -fpic -mfpu=fpv4-sp-d16 -mfloat-abi=hard -lc -lm -nostartfiles" 
 
-if [ ! -d bin ]; then
-	mkdir bin
-fi
+compile() {
+BINDIR=bin
+ADDITIONALFLAGS=$1
 
-arm-none-eabi-gcc $FLGS $INC $OPT $DWARF -c src/driver.c -o bin/driver.o
+	if [ ! -z $2 ]; then
+		BINDIR=$BINDIR/$2
+	fi
 
-# first compile contains DWARF data
-arm-none-eabi-gcc $LNKFLGS -Tsrc/driver.ld -Wl,-Map=bin/debugging.map bin/*.o -o bin/debugging.elf
-arm-none-eabi-objdump -S bin/debugging.elf > bin/debugging.obj
+	if [ ! -d $BINDIR ]; then
+		mkdir $BINDIR
+	fi
 
-# second compile without DWARF data (for some reason objcopy does not strip 
-# out our DWARF data)
+	arm-none-eabi-gcc $FLGS $ADDITIONALFLAGS $INC $OPT $DWARF -c src/driver.c -o $BINDIR/driver.o
 
-arm-none-eabi-gcc -s $LNKFLGS -Tsrc/driver.ld -Wl,-Map=bin/driver.map bin/*.o -o bin/driver.elf
-arm-none-eabi-objcopy -O binary bin/driver.elf bin/driver.bin
+	# first compile contains DWARF data
+	arm-none-eabi-gcc $LNKFLGS -Tsrc/driver.ld -Wl,-Map=$BINDIR/debugging.map $BINDIR/*.o -o $BINDIR/debugging.elf
+	arm-none-eabi-objdump -S $BINDIR/debugging.elf > $BINDIR/debugging.obj
 
-dasm src/ace.asm -Ibin -d -lbin/driver.lst -sbin/driver.sym -f3 -v5 -obin/driver.ace
+	# second compile without DWARF data (for some reason objcopy does not strip 
+	# out our DWARF data)
+
+	arm-none-eabi-gcc -s $LNKFLGS -Tsrc/driver.ld -Wl,-Map=$BINDIR/driver.map $BINDIR/*.o -o $BINDIR/driver.elf
+	arm-none-eabi-objcopy -O binary $BINDIR/driver.elf $BINDIR/driver.bin
+
+DASM_DEFINES="-DALT=0"
+	if [ ! -z $2 ]; then
+		DASM_DEFINES="-DALT=1"
+	fi
+
+	dasm src/ace.asm $DASM_DEFINES -I$BINDIR -d -l$BINDIR/driver.lst -s$BINDIR/driver.sym -f3 -v5 -o$BINDIR/driver.ace
+	md5sum $BINDIR/driver.ace
+}
+
+compile
+compile '-DALT' 'alt'

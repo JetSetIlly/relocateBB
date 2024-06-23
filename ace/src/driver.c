@@ -82,8 +82,14 @@ int emulate_ACEROM_cartridge()
     // ROMs built with an old DPC+ driver and using the newer mask can
     // result in 'jittering' in the playfield display
     // For current versions, this is 0x0F00FF; older versions need 0x0F0000
+
+	// this equates to clearing the fractional counter when the low byte of the
+	// fractional fetcher is set
+#ifdef ALT
+	uint32_t myFractionalLowMask = 0x0F0000;
+#else
 	uint32_t myFractionalLowMask = 0x0F00FF;
-//	uint32_t myFractionalLowMask = 0x0F0000;
+#endif
 
 	// Initialise the DPC's random number generator register
 	uint32_t myRandomNumber = 0x70435044; // "DPCp";

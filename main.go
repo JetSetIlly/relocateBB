@@ -15,6 +15,9 @@ import (
 //go:embed "ace/bin/driver.ace"
 var newDriver []byte
 
+//go:embed "ace/bin/alt/driver.ace"
+var newDriverAlt []byte
+
 //go:embed "custom/bin/custom.bin"
 var newCustom []byte
 
@@ -31,14 +34,18 @@ const (
 // sanity checks before continuing with main program
 func init() {
 	if len(newDriver) != customOrigin {
-		panic("ACE header is incorrect length. Must be exactly 3k")
+		panic(fmt.Sprintf("driver header is incorrect length. Must be exactly %0x bytes", customOrigin))
+	}
+
+	if len(newDriverAlt) != customOrigin {
+		panic(fmt.Sprintf("alt driver header is incorrect length. Must be exactly %0x bytes", customOrigin))
 	}
 
 	if len(newCustom) > customLength {
 		panic(fmt.Sprintf("replacement custom program cannot be larger than %dbytes", customLength))
 	}
 
-	_, err := driverVersion(newDriver)
+	_, err := aceDriverVersion(newDriver)
 	if err != nil {
 		panic(fmt.Sprintf("refusing to work with replacement ACE driver: %v", err))
 	}
@@ -125,14 +132,14 @@ func doCheck(fn string) error {
 		driverMD5 := md5.Sum(driver)
 		fmt.Printf("driver md5: %x\n", driverMD5)
 
-		version, err := driverVersion(driver)
+		version, err := aceDriverVersion(driver)
 		if err != nil {
 			// any driver version error causes the checking of this ROM to end
 			return err
 		}
 		fmt.Printf("driver version: %s\n", version)
 
-		if driverMD5 != md5.Sum(newDriver) {
+		if driverMD5 != md5.Sum(newDriver) && driverMD5 != md5.Sum(newDriverAlt) {
 			// if the driver is not recognised we don't want to continue with
 			// the information about the custom code
 			return fmt.Errorf("not added by this version of %s\n", programName)
@@ -164,6 +171,12 @@ func doRelocate(fn string, ace bool) error {
 		return fmt.Errorf("%s is not a DPC+ file", fn)
 	}
 
+	// check harmony version and whether it should use the alt driver
+	alt, ok := harmonyDriverCheck(original[:customOrigin])
+	if !ok {
+		return fmt.Errorf("%s contains an unrecognised harmony driver", fn)
+	}
+
 	// slice off custom code
 	custom := original[customOrigin:customMemtop]
 
@@ -191,7 +204,11 @@ func doRelocate(fn string, ace bool) error {
 
 	if ace {
 		// replace Harmony DPC+ driver with ACE DPC+ driver
-		o = newDriver[:customOrigin]
+		if alt {
+			o = newDriverAlt[:customOrigin]
+		} else {
+			o = newDriver[:customOrigin]
+		}
 
 		// add new custom section and use remainder of original file untouched
 		o = append(o, newCustom...)
@@ -254,9 +271,9 @@ func doRelocate(fn string, ace bool) error {
 	return nil
 }
 
-// driverVersion returns the embedded version string of an ACE driver or an
+// aceDriverVersion returns the embedded version string of an ACE driver or an
 // error if the version is not recognised or supported
-func driverVersion(driver []byte) (string, error) {
+func aceDriverVersion(driver []byte) (string, error) {
 	// ace driver name is 16 chars wide exactly
 	const (
 		aceDriveNameOrigin = 0x08
@@ -280,4 +297,24 @@ func driverVersion(driver []byte) (string, error) {
 	version = strings.TrimSpace(version)
 
 	return version, nil
+}
+
+// checks whether harmony driver is known. returns whether to use the alt driver
+// and whether the driver is in the list of known drivers
+func harmonyDriverCheck(b []byte) (bool, bool) {
+	// map of known drivers and whether they should be replaced with the alt
+	// driver or not
+	var knownDriverMD5 = map[string]bool{
+		"17884ec14f9b1d06fe8d617a1fbdcf47": false,
+		"5f80b5a5adbe483addc3f6e6f1b472f8": true,
+		"8dd73b44fd11c488326ce507cbeb19d1": true,
+		"b328dbdf787400c0f0e2b88b425872a5": false,
+	}
+
+	md5sum := fmt.Sprintf("%x", md5.Sum(b))
+	if v, ok := knownDriverMD5[md5sum]; ok {
+		return v, true
+	}
+
+	return false, false
 }

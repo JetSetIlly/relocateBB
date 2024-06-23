@@ -17,16 +17,26 @@ ACE-UF00:
 
 
 ACE-Driver:	
+; the ALT symbol must be defined
+	IFNCONST ALT
+		ECHO "ALT is not defined"
+		ERR
+	ENDIF
+
 ; driver name should always begin with the string "DPCp " (including the space)
 ;
 ; it should also include a version string of the form "vX.YY" where X and YY are
-; integers
+; integers. for the 'alt' driver the suffix 'a' should be included
 ;
 ; nothing else should be included in the driver name apart from whitespace
 ;
 ; finally, the driver name should be exactly string 16 chars wide exactly 
-;                "                "
-			dc.b "DPCp v1.06      "
+;		     "                "
+	IF ALT == 1
+		dc.b "DPCp v1.07a     "
+	ELSE
+		dc.b "DPCp v1.07      "
+	ENDIf
 
 ACE-Driver-Version:	
 			.byte $00

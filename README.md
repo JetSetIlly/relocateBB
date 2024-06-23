@@ -26,21 +26,38 @@ The ACE driver is versioned and any substantial change to the driver code *must*
 The relevant section of the ace.asm file is. Please follow the directives in the commentary.
 
 ```
-ACE-Driver:
 ; driver name should always begin with the string "DPCp " (including the space)
 ;
 ; it should also include a version string of the form "vX.YY" where X and YY are
-; integers
+; integers. for the 'alt' driver the suffix 'a' should be included
 ;
 ; nothing else should be included in the driver name apart from whitespace
 ;
-; finally, the driver name should be exactly string 16 chars wide exactly
-;                "                "
-            dc.b "DPCp v1.0       "
+; finally, the driver name should be exactly string 16 chars wide exactly 
+;		     "                "
+	IF ALT == 1
+		dc.b "DPCp v1.07a     "
+	ELSE
+		dc.b "DPCp v1.07      "
+	ENDIf
 ```
 
 **NOTE**: The version string is `DPCp` and not `DPC+` in order to distinguish it from DPC+ binaries compiled for the Harmony type cartridges. Failure to distinguish the two types of binary would likely result in confusion. 
 
+#### The 'ALT' driver
+
+The 'ALT' driver is a small variation of the standard DPCp driver which is required when converting some DPC+ ROMs. Whether the 'ALT' type is required depends on the version of the Harmony driver being replaced.
+
+| MD5 of Harmony Driver            | Replace |
+|----------------------------------|---------|
+| 17884ec14f9b1d06fe8d617a1fbdcf47 | NORMAL  |
+| 5f80b5a5adbe483addc3f6e6f1b472f8 | ALT     |
+| 8dd73b44fd11c488326ce507cbeb19d1 | ALT     |
+| b328dbdf787400c0f0e2b88b425872a5 | NORMAL  |
+
+Technical detail: The 'ALT' driver differs from the 'NORMAL' driver in that the counter bits of the fraction fetcher are reset when the 'low' byte of the fetcher is set. It's such a small difference and yet using the wrong driver can sometimes be noticed in the form of playfield shimmer. 
+
+As indicated in the `ACE Driver Versions` section above, the 'ALT' driver is distinguished with an 'a' appended to the version number.
 
 ## bB Custom Code
 

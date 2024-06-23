@@ -124,8 +124,8 @@ LOAD linker stubs
  .debug_macinfo
                 0x0000000000000000    0xd5449 bin/driver.o
 
-.debug_line     0x0000000000000000     0x15d5
- .debug_line    0x0000000000000000     0x15d5 bin/driver.o
+.debug_line     0x0000000000000000     0x15d7
+ .debug_line    0x0000000000000000     0x15d7 bin/driver.o
 
 .debug_str      0x0000000000000000      0x555
  .debug_str     0x0000000000000000      0x555 bin/driver.o

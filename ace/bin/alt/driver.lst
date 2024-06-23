@@ -33,10 +33,10 @@
      32  0008							;
      33  0008							; finally, the driver name should be exactly string 16 chars wide exactly
      34  0008							;		     " 	       "
-     35  0008				  -	      IF	ALT == 1
-     36  0008				  -	      dc.b	"DPCp v1.07a	  "
-     37  0008					      ELSE
-     38  0008		       44 50 43 70*	      dc.b	"DPCp v1.07	  "
+     35  0008					      IF	ALT == 1
+     36  0008		       44 50 43 70*	      dc.b	"DPCp v1.07a	  "
+     37  0018				  -	      ELSE
+     38  0018				  -	      dc.b	"DPCp v1.07	  "
      39  0018					      ENDIf
      40  0018
      41  0018				   ACE-Driver-Version
@@ -61,7 +61,7 @@
      60  0030		       00		      align	16
      61  0030				   ARMCODE
      62  0030					      incbin	"driver.bin"
-     63  0a28
+     63  0a24
      64  0bff					      org	$0bff
      65  0bff		       00		      .byte.b	$00
      66  0c00
