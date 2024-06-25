@@ -66,7 +66,7 @@ func main() {
 
 	var check bool
 	var ace bool
-	flgs.BoolVar(&check, "check", false, "checks for valid STM32 DPC+ and displays version information")
+	flgs.BoolVar(&check, "check", false, "checks for valid DPC+ and displays version information")
 	flgs.BoolVar(&ace, "ace", true, "add ACE header to converted binary")
 
 	err := flgs.Parse(os.Args[1:])
@@ -110,7 +110,7 @@ func doCheck(fn string) error {
 
 	// length check
 	if len(original) != 32768 {
-		return fmt.Errorf("not a STM32 DPCp or an original DPC+ file")
+		return fmt.Errorf("not a DPC+ file")
 	}
 
 	// check for DPCp in the first customOrigin bytes
@@ -128,7 +128,7 @@ func doCheck(fn string) error {
 			return nil
 		}
 
-		return fmt.Errorf("not a STM32 DPCp or an original DPC+ file")
+		return fmt.Errorf("not a DPC+ file")
 	}
 
 	// information about the ACE driver
@@ -150,7 +150,7 @@ func doCheck(fn string) error {
 			return fmt.Errorf("not added by this version of %s\n", programName)
 		}
 	} else {
-		fmt.Println("driverless STM32 DPCp file")
+		fmt.Println("driverless STM32 DPC+ file")
 	}
 
 	// information about the BB custom section
@@ -294,7 +294,7 @@ func aceDriverVersion(driver []byte) (string, error) {
 
 	// all ACE driver names should start with the 'DPCp' string
 	if name[:4] != "DPCp" {
-		return "", fmt.Errorf("unsupported STM32 DPC+ driver")
+		return "", fmt.Errorf("unsupported ACE driver")
 	}
 
 	// extract version number
