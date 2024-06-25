@@ -119,7 +119,12 @@ func doCheck(fn string) error {
 		dpcpCount = bytes.Count(original[:customOrigin], []byte("DPC+"))
 		if dpcpCount >= 2 {
 			fmt.Println("original DPC+ file")
-			fmt.Printf("driver md5: %x\n", md5.Sum(original[:customOrigin]))
+			sum := md5.Sum(original[:customOrigin])
+			if _, ok := harmonyDriverCheck(original[:customOrigin]); ok {
+				fmt.Printf("driver md5: %x\n", sum)
+			} else {
+				fmt.Printf("unrecognised driver md5: %x\n", sum)
+			}
 			return nil
 		}
 
