@@ -2,7 +2,43 @@
 
 RelocateBB is a tool to be used with [Batari Basic](https://github.com/batari-Basic/batari-Basic) ROM files. It allows games that use the DPC+ kernel to be run on the PlusCart or the UnoCart. It will do nothing for bB games that that don't use the DPC+ kernel - those games will already run on the PlusCart and UnoCart.
 
-## ACE driver
+## Usage
+
+Run RelocateBB from the command line. The `-help` argument shows the usage and the available options
+
+```
+Usage: relocateBB_linux_amd64 (options) [list of rom files]
+  -ace
+    	add ACE header to converted binary (default true)
+  -check
+    	checks for valid PlusROM DPC+ and displays version information
+```
+
+The `-ace` option should almost always be left at the default value of true.
+
+The `-check` option provides information about a file, indicating whether its a DPC+ file or a converted DPC+ file. In the case of a converted file the output will include version number information about hashes of the driver and custom code sections.
+
+#### Unconverted DPC+ file
+
+```
+relocateBB -check Unholy_demo_2020_07_06.bin 
+original DPC+ file
+driver md5: 5f80b5a5adbe483addc3f6e6f1b472f8
+```
+
+#### Converted DPC+ file
+
+```
+relocateBB -check Unholy_demo_2020_07_06.ace 
+driver md5: ef12c0d0d6b985c5147b9deba63d68b6
+driver version: v1.07a
+bb md5: 5d3f5788a71fb24a678cb6622702c3dd
+```
+
+
+## Developer Detail
+
+### ACE driver
 
 #### Compilation
 
@@ -59,7 +95,7 @@ Technical detail: The 'ALT' driver differs from the 'NORMAL' driver in that the 
 
 As indicated in the `ACE Driver Versions` section above, the 'ALT' driver is distinguished with an 'a' appended to the version number.
 
-## bB Custom Code
+### bB Custom Code
 
 #### Compilation
 
